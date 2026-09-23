@@ -200,6 +200,7 @@ def test_repeatable_occurrences_award_once_each_and_match_expected_gain(client, 
     first = first_response.json()
     assert first['already_completed'] is False
     assert first['profile']['employee']['skills']['SK_SPEAK'] == 2
+    assert first['profile']['trajectory']['coverage'] == expected['projected_coverage']
     first_history = next(item for item in first['profile']['history'] if item['event_id'] == 'EV_036' and item['occurred_at'] == '2026-10-05')
     assert first_history['changes'] == expected['changes']
     retry = complete(client, '2026-10-05').json()
@@ -211,6 +212,7 @@ def test_repeatable_occurrences_award_once_each_and_match_expected_gain(client, 
     second = second_response.json()
     assert second['already_completed'] is False
     assert second['profile']['employee']['skills']['SK_SPEAK'] == 3
+    assert second['profile']['trajectory']['coverage'] == second_expected['projected_coverage']
     assert complete(client, '2026-10-12').json()['already_completed'] is True
     assert complete(client, '2026-10-05').json()['already_completed'] is True
     assert len([item for item in profile(client)['history'] if item['event_id'] == 'EV_036' and item['status'] == 'completed']) == 3

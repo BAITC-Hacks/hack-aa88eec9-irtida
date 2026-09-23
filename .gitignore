@@ -13,6 +13,7 @@ __pycache__/
 *.db-*
 data/private/*
 !data/private/.gitkeep
+/career_quest_dataset/
 playwright-report/
 test-results/
 coverage/

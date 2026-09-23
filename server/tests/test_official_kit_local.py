@@ -94,6 +94,10 @@ def test_official_full_import_dry_run_write_and_repeat(tmp_path, official_source
             assert db.scalar(select(func.count()).select_from(Activity)) == 2743
         assert first['employees_added'] == 200
         assert first['history_added'] == 2743
+        assert first['completed_after_review'] == repeated['completed_after_review'] == 318
+        for summary in (first, repeated):
+            warnings = {item['code']: item for item in summary['warnings']}
+            assert warnings['mandatory_history_repeated_after_completion']['count'] == 544
         assert repeated['employees_added'] == repeated['history_added'] == 0
     finally:
         engine.dispose()

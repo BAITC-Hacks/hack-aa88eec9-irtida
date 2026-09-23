@@ -84,6 +84,27 @@ def test_gain_above_met_requirement_is_not_counted_as_closing_a_gap(development_
     assert option['evidence'][1]['text'] == 'System Design: 2 → 4'
 
 
+def test_projected_coverage_uses_server_rounding_without_mutating_profile(development_data):
+    employee, catalog = development_data
+    employee['skills'] = {'DESIGN': 0, 'SPEAK': 0}
+    catalog['grade_rules'][0]['requirements'] = {'DESIGN': 4, 'SPEAK': 4}
+    original = copy.deepcopy(employee)
+    option = candidates(employee, catalog, [])[0]
+    # 1/8 = 12.5%; Python round is 12, whereas JavaScript Math.round is 13.
+    assert option['projected_coverage'] == 12
+    assert employee == original
+    assert trajectory(employee, catalog)['coverage'] == 0
+
+
+def test_projected_coverage_preserves_unknown_skill_semantics(development_data):
+    employee, catalog = development_data
+    employee['skills'] = {'DESIGN': 2}
+    option = candidates(employee, catalog, [])[0]
+    assert option['changes']['DESIGN']['after'] == 3
+    assert option['projected_coverage'] is None
+    assert 'SPEAK' not in employee['skills']
+
+
 @pytest.mark.parametrize(('level', 'gain', 'maximum', 'expected'), [
     (0, 5, 5, 5), (2, 5, 3, 1), (4, 5, 5, 1),
     (5, 5, 5, 0), (4, 2, 3, 0), (0, 5, 0, 0), (1, 0, 5, 0),
@@ -156,12 +177,14 @@ def test_expected_changes_equal_actual_changes_and_preserve_unknowns(tmp_path, d
             db.add(Employee(id=employee['id'], profile=employee))
             db.commit()
         assert client.post('/api/v1/auth/demo', json={'account': employee['id']}).status_code == 200
-        expected = client.get('/api/v1/employees/SYNTHETIC').json()['available'][0]['changes']
+        candidate = client.get('/api/v1/employees/SYNTHETIC').json()['available'][0]
+        expected = candidate['changes']
         response = client.post('/api/v1/employees/SYNTHETIC/events/DESIGN_WORKSHOP/complete')
         assert response.status_code == 200
         profile = response.json()['profile']
         assert profile['employee']['skills'] == {'DESIGN': 3, 'SPEAK': 5}
         assert profile['history'][0]['changes'] == expected
+        assert profile['trajectory']['coverage'] == candidate['projected_coverage'] == 80
         assert profile['recommendation'] is None
         assert profile['employee']['grade'] == 'Middle'
         repeat = client.post('/api/v1/employees/SYNTHETIC/events/DESIGN_WORKSHOP/complete').json()

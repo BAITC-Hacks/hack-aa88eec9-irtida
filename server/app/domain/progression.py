@@ -2,7 +2,7 @@ from collections import Counter, defaultdict
 
 
 # Invalidate persisted recommendations when deterministic calculations change.
-DOMAIN_VERSION = 'kit-progression-v3'
+DOMAIN_VERSION = 'kit-progression-v4'
 
 
 def gain_for(level: int, gain: int, max_level: int) -> int:
@@ -140,7 +140,14 @@ def _rank_candidates(employee: dict, catalog: dict, history: list[dict], path: d
                 f"в процессе {related['in_progress']}, просрочено {related['overdue']}."
                 if related else 'Истории участия в этом типе и формате пока нет; предпочтения неизвестны.'
             )
+        projected_employee = {**employee, 'skills': {
+            **employee['skills'], **{skill_id: change['after'] for skill_id, change in changes.items()},
+        }}
+        # Preview and persisted completion use the same coverage calculation,
+        # including unknown skills, caps and rounding. The browser only displays it.
+        projected_coverage = trajectory(projected_employee, catalog)['coverage']
         result.append({**event, 'changes': changes, 'benefit': benefit, 'critical_benefit': critical_benefit,
+                       'projected_coverage': projected_coverage,
                        'score': round(score, 3), 'evidence': evidence,
                        **({'occurrence_id': session_date, 'session_date': session_date} if official else {})})
     return sorted(result, key=lambda x: (-x['score'], x['id'])), dict(blockers)

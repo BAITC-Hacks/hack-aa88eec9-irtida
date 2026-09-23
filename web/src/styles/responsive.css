@@ -1,0 +1,853 @@
+@media(min-width:1600px) {
+  .hero-content {
+    padding: 36px 0 36px 38px;
+  }
+  .hero-content h2 {
+    font-size: 44px;
+  }
+  .journey-hero {
+    min-height: 335px;
+  }
+}
+@media(max-width:1190px) {
+  .sidebar {
+    width: 202px;
+    padding: 28px 13px 18px;
+  }
+  .sidebar .brand-link {
+    margin-left: 4px;
+    margin-right: 0;
+  }
+  .brand {
+    font-size: 20px;
+  }
+  .main-shell {
+    margin-left: 202px;
+  }
+  .workspace {
+    padding: 28px 25px 0;
+  }
+  .topbar {
+    padding: 0 25px;
+  }
+  .growth-grid {
+    gap: 18px;
+    grid-template-columns: minmax(0,1.3fr) minmax(250px,1fr);
+  }
+  .quest-card {
+    padding: 20px;
+  }
+  .recommended {
+    margin-left: 0;
+    font-size: 8px;
+  }
+  .hero-content {
+    padding-left: 26px;
+  }
+  .hero-content h2 {
+    font-size: 34px;
+  }
+  .hero-content p {
+    font-size: 11px;
+  }
+  .stat {
+    padding: 17px 13px;
+    gap: 11px;
+  }
+  .stat-icon {
+    width: 35px;
+    height: 35px;
+  }
+  .stat div>span {
+    font-size: 9px;
+  }
+  .badge-grid {
+    gap: 12px;
+  }
+  .achievement {
+    padding: 17px 12px;
+    gap: 10px;
+  }
+  .badge-art {
+    width: 38px;
+    height: 44px;
+  }
+  .achievement h3 {
+    font-size: 11px;
+  }
+  .private-label {
+    display: none;
+  }
+  .hero-caption {
+    font-size: 8px;
+  }
+  .map-node.start span {
+    left: 35%;
+    font-size: 10px;
+  }
+  .map-note {
+    font-size: 5px;
+  }
+  .quests-section>.section-heading {
+    align-items: flex-start;
+  }
+  .quests-section>.section-heading .secondary {
+    max-width: 145px;
+  }
+  .section-heading h2 {
+    font-size: 18px;
+  }
+  .quest-top {
+    gap: 7px;
+  }
+}
+@media(max-width:1000px) {
+  .sidebar {
+    width: 78px;
+    padding: 26px 12px;
+  }
+  .brand small,.sidebar .brand>span:last-child,.workspace-label,.sidebar nav button>span,.sidebar nav button>small,.sidebar-note,.sidebar-bottom>.demo-tag {
+    display: none;
+  }
+  .sidebar .brand-link {
+    margin: 0 5px 35px;
+  }
+  .sidebar nav button {
+    justify-content: center;
+    padding: 14px;
+  }
+  .sidebar nav button .icon {
+    width: 21px;
+    height: 21px;
+  }
+  .sidebar-bottom {
+    padding: 0;
+  }
+  .logout {
+    font-size: 0;
+    justify-content: center;
+    padding: 15px 0;
+  }
+  .logout .icon {
+    width: 21px;
+    height: 21px;
+  }
+  .main-shell {
+    margin-left: 78px;
+  }
+  .workspace {
+    padding: 26px 25px 0;
+  }
+  .hero-content h2 {
+    font-size: 36px;
+  }
+  .sidebar nav button {
+    position: relative;
+  }
+  .sidebar nav button.active:before {
+    left: -12px;
+  }
+  .sidebar nav button::after {
+    content: attr(aria-label);
+    display: none;
+  }
+  .badge-grid {
+    gap: 12px;
+  }
+  .import-panel {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .people-grid {
+    grid-template-columns: 1fr;
+  }
+  .hr-grid {
+    gap: 18px;
+  }
+  .panel {
+    padding: 22px;
+  }
+}
+@media(max-width:800px) {
+  .growth-grid {
+    grid-template-columns: 1fr;
+  }
+  .skills-column {
+    display: grid;
+    grid-template-columns: minmax(0,1.4fr) minmax(0,1fr);
+    gap: 18px;
+  }
+  .pace-card {
+    margin-top: 0;
+    align-self: start;
+  }
+  .skill-panel {
+    padding: 23px;
+  }
+  .journey-map {
+    min-height: 250px;
+  }
+  .hero-content {
+    padding: 26px 0 26px 24px;
+  }
+  .hero-content h2 {
+    font-size: 31px;
+  }
+  .hero-content p {
+    font-size: 11px;
+    max-width: 230px;
+  }
+  .hero-caption {
+    max-width: 210px;
+    font-size: 8px;
+  }
+  .hero-label {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+  .map-node.current {
+    left: 36%;
+    width: 44px;
+    height: 44px;
+  }
+  .map-node.current span {
+    font-size: 9px;
+    top: 53px;
+  }
+  .map-node.start {
+    left: 10%;
+    top: 66%;
+  }
+  .map-node.start span {
+    font-size: 9px;
+  }
+  .map-node.finish {
+    right: 12%;
+    top: 15%;
+    width: 37px;
+    height: 37px;
+  }
+  .map-node.finish span {
+    font-size: 10px;
+  }
+  .map-node.middle {
+    left: 68%;
+    top: 60%;
+    width: 24px;
+    height: 24px;
+  }
+  .map-note {
+    display: none;
+  }
+  .page-heading h1 {
+    font-size: 28px;
+  }
+  .page-heading p {
+    font-size: 11px;
+  }
+  .stat {
+    gap: 9px;
+    padding: 17px 12px;
+  }
+  .stat-icon {
+    width: 29px;
+    height: 32px;
+    border-radius: 9px;
+  }
+  .stat-icon>.icon {
+    width: 16px;
+  }
+  .stat strong {
+    font-size: 23px;
+  }
+  .stat-grid {
+    gap: 10px;
+  }
+  .stat div>span {
+    font-size: 8px;
+  }
+  .badge-grid {
+    grid-template-columns: 1fr;
+  }
+  .achievement {
+    padding: 17px 21px;
+    gap: 20px;
+  }
+  .achievement h3 {
+    font-size: 14px;
+  }
+  .achievement p {
+    font-size: 11px;
+    max-width: none;
+  }
+  .badge-art {
+    width: 42px;
+    height: 48px;
+  }
+  .badge-state {
+    font-size: 10px;
+  }
+  .hr-grid {
+    grid-template-columns: 1fr;
+  }
+  .welcome {
+    gap: 30px;
+    padding-top: 40px;
+  }
+  .welcome-copy h1 {
+    font-size: 40px;
+  }
+  .login-card {
+    padding: 26px;
+  }
+  .welcome-steps {
+    gap: 10px;
+  }
+  .welcome-steps>.icon {
+    width: 11px;
+  }
+  .welcome-steps span {
+    font-size: 9px;
+  }
+  .welcome-copy>p {
+    font-size: 13px;
+  }
+  .workspace-footer {
+    font-size: 7px;
+  }
+  .workspace-footer>span:last-child {
+    display: none;
+  }
+  .topbar {
+    height: 70px;
+  }
+  .user-name {
+    font-size: 10px;
+  }
+  .breadcrumb {
+    font-size: 10px;
+    gap: 9px;
+  }
+  .page-heading .grade-chip {
+    font-size: 10px;
+    padding: 7px 10px;
+  }
+  .timeline .status {
+    font-size: 8px;
+  }
+  .quest-top {
+    gap: 9px;
+  }
+  .recommended {
+    margin-left: auto;
+    font-size: 9px;
+  }
+}
+@media(max-width:600px) {
+  .sidebar {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    padding: 17px 18px 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .sidebar .brand-link {
+    margin: 0;
+  }
+  .sidebar .brand>span:last-child,.sidebar .brand small {
+    display: block;
+  }
+  .brand {
+    font-size: 21px;
+  }
+  .brand small {
+    font-size: 6px;
+  }
+  .brand-mark {
+    width: 34px;
+    height: 37px;
+  }
+  .sidebar-bottom {
+    margin: 0;
+    order: 1;
+    padding: 0;
+  }
+  .logout {
+    font-size: 0;
+    min-width: 42px;
+    padding: 9px;
+  }
+  .sidebar nav {
+    display: flex;
+    overflow-x: auto;
+    width: calc(100% + 36px);
+    margin: 0 -18px;
+    padding: 4px 14px 9px;
+    order: 2;
+    gap: 5px;
+    scrollbar-width: thin;
+  }
+  .sidebar nav button {
+    flex-shrink: 0;
+    gap: 7px;
+    padding: 9px 10px;
+    min-height: 39px;
+    font-size: 10px;
+    border-radius: 7px;
+  }
+  .sidebar nav button>span {
+    display: block;
+  }
+  .sidebar nav button>.icon {
+    width: 15px;
+    height: 15px;
+  }
+  .sidebar nav button.active:before {
+    display: none;
+  }
+  .main-shell {
+    margin-left: 0;
+  }
+  .topbar {
+    height: 52px;
+    padding: 0 20px;
+  }
+  .breadcrumb {
+    font-size: 9px;
+    gap: 8px;
+  }
+  .breadcrumb strong {
+    font-weight: 500;
+  }
+  .topbar-user {
+    gap: 7px;
+  }
+  .small-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 8px;
+  }
+  .user-name,.user-name small {
+    display: none;
+  }
+  .workspace {
+    padding: 23px 18px 0;
+  }
+  .page-heading {
+    gap: 12px;
+    margin-bottom: 23px;
+    align-items: flex-start;
+  }
+  .page-heading h1 {
+    font-size: 27px;
+    letter-spacing: -.9px;
+  }
+  .page-heading .eyebrow {
+    font-size: 8px;
+    letter-spacing: 1.2px;
+  }
+  .page-heading p {
+    font-size: 10px;
+    line-height: 1.9;
+  }
+  .page-heading .dot {
+    padding: 0 4px;
+  }
+  .grade-chip {
+    margin-top: 25px;
+    max-width: 90px;
+    overflow-wrap: anywhere;
+  }
+  .grade-chip>.icon {
+    display: none;
+  }
+  .journey-hero {
+    grid-template-columns: 1fr;
+    border-radius: 16px;
+  }
+  .hero-content {
+    padding: 27px 24px 0;
+  }
+  .hero-label {
+    font-size: 8px;
+  }
+  .hero-content h2 {
+    font-size: 36px;
+  }
+  .hero-content p {
+    max-width: 300px;
+    font-size: 12px;
+  }
+  .hero-content .lime-button {
+    width: 100%;
+    font-size: 12px;
+    margin-top: 20px;
+  }
+  .hero-caption {
+    max-width: none;
+    justify-content: center;
+    font-size: 8px;
+  }
+  .journey-map {
+    min-height: 215px;
+    margin: 0 15px 22px;
+  }
+  .map-node.start {
+    left: 6%;
+    top: 66%;
+  }
+  .map-node.current {
+    left: 36%;
+    top: 37%;
+  }
+  .map-node.finish {
+    right: 10%;
+    top: 10%;
+  }
+  .map-node.middle {
+    left: 65%;
+    top: 57%;
+  }
+  .map-node.current span {
+    font-size: 10px;
+  }
+  .map-node.start span {
+    left: 65%;
+  }
+  .stat-grid {
+    gap: 8px;
+    margin: 15px 0 28px;
+  }
+  .stat {
+    padding: 14px 9px;
+    display: block;
+    text-align: left;
+    border-radius: 10px;
+  }
+  .stat-icon {
+    width: 26px;
+    height: 27px;
+    border-radius: 7px;
+    margin-bottom: 10px;
+  }
+  .stat strong {
+    font-size: 24px;
+    letter-spacing: -.6px;
+  }
+  .stat strong small {
+    font-size: 12px;
+  }
+  .stat div>span {
+    font-size: 9px;
+    line-height: 1.5;
+    max-width: 85px;
+    margin-top: 5px;
+  }
+  .section-heading {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .quests-section .eyebrow {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .quests-section h2 {
+    font-size: 21px;
+  }
+  .quests-section>.section-heading .secondary {
+    font-size: 10px;
+    padding: 9px;
+    max-width: none;
+    min-height: 40px;
+  }
+  .quests-section>.section-heading .secondary>.icon {
+    width: 14px;
+  }
+  .quest-card {
+    padding: 20px;
+    border-radius: 12px;
+  }
+  .quest-card h3 {
+    font-size: 19px;
+  }
+  .quest-top {
+    gap: 8px;
+  }
+  .recommended {
+    font-size: 8px;
+    margin-left: 0;
+  }
+  .quest-icon {
+    width: 28px;
+    height: 28px;
+  }
+  .tag {
+    font-size: 9px;
+  }
+  .quest-gains>span {
+    font-size: 10px;
+  }
+  .why summary {
+    font-size: 11px;
+  }
+  .why li {
+    font-size: 11px;
+  }
+  .quest-impact {
+    font-size: 10px;
+  }
+  .quest-impact small {
+    font-size: 9px;
+  }
+  .skills-column {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .pace-card {
+    padding: 20px;
+  }
+  .skill-panel {
+    padding: 24px;
+  }
+  .skill-panel h2 {
+    font-size: 20px;
+  }
+  .skill-panel .fine-print {
+    font-size: 10px;
+  }
+  .skill-heading {
+    font-size: 13px;
+  }
+  .skill>small {
+    font-size: 10px;
+  }
+  .achievement {
+    padding: 19px;
+    gap: 18px;
+  }
+  .achievements-section {
+    margin-top: 28px;
+  }
+  .history-section {
+    padding: 22px 18px;
+  }
+  .history-section h2 {
+    font-size: 20px;
+  }
+  .filter-label {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 3px;
+  }
+  .filter-label select {
+    min-width: 180px;
+  }
+  .timeline li {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 7px 12px;
+    padding: 16px 0;
+  }
+  .timeline-icon {
+    width: 28px;
+    height: 28px;
+    grid-row: span 2;
+    align-self: start;
+  }
+  .timeline .status {
+    grid-column: 2;
+    justify-self: start;
+    font-size: 9px;
+    margin-top: 2px;
+  }
+  .timeline h3 {
+    font-size: 12px;
+  }
+  .timeline time {
+    font-size: 10px;
+  }
+  .workspace-footer {
+    padding: 22px 0;
+    font-size: 6px;
+    letter-spacing: .4px;
+    text-align: center;
+    justify-content: center;
+    margin-top: 28px;
+  }
+  .celebration {
+    padding: 18px 14px;
+    gap: 12px;
+  }
+  .celebration-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .celebration h2 {
+    font-size: 17px;
+  }
+  .celebration p,.celebration strong {
+    font-size: 11px;
+  }
+  .celebration .icon-button {
+    min-width: 28px;
+    width: 28px;
+    height: 28px;
+  }
+  .message {
+    padding: 13px;
+    font-size: 11px;
+    flex-wrap: wrap;
+  }
+  .message>.icon {
+    width: 15px;
+  }
+  .message>span {
+    min-width: 200px;
+  }
+  .message .icon-button {
+    margin-left: auto;
+  }
+  .empty-quest {
+    padding: 32px 19px;
+  }
+  .empty-quest p {
+    font-size: 12px;
+  }
+  .empty-quest h3 {
+    font-size: 20px;
+  }
+  .ai-loading {
+    padding: 17px;
+    gap: 12px;
+  }
+  .ai-loading strong {
+    font-size: 11px;
+  }
+  .ai-loading p {
+    font-size: 10px;
+  }
+  .orb {
+    width: 35px;
+    height: 35px;
+  }
+  .complete-dialog {
+    padding: 26px 21px;
+  }
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+  .complete-dialog h2 {
+    font-size: 22px;
+  }
+  .welcome-header {
+    padding: 24px;
+  }
+  .welcome-header .demo-tag {
+    font-size: 8px;
+  }
+  .welcome {
+    grid-template-columns: 1fr;
+    padding: 28px 24px 45px;
+    gap: 40px;
+  }
+  .welcome-copy h1 {
+    font-size: 43px;
+    letter-spacing: -1.8px;
+  }
+  .welcome-copy>.eyebrow {
+    font-size: 8px;
+    margin-bottom: 18px;
+  }
+  .welcome-copy>p {
+    font-size: 13px;
+    max-width: 330px;
+    margin-top: 20px;
+  }
+  .welcome-steps {
+    margin-top: 24px;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .welcome-steps span {
+    font-size: 10px;
+  }
+  .welcome-note {
+    margin-top: 22px;
+    font-size: 10px;
+  }
+  .login-card {
+    padding: 26px 20px;
+    border-radius: 17px;
+  }
+  .login-card h2 {
+    font-size: 24px;
+  }
+  .welcome-footer {
+    font-size: 7px;
+    gap: 15px;
+    padding: 20px 24px;
+  }
+  .welcome-footer>span {
+    max-width: 175px;
+    text-align: right;
+  }
+  .account-list {
+    max-height: 360px;
+  }
+  .hr-profile-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .hr-profile-toolbar label {
+    display: flex;
+    justify-content: space-between;
+  }
+  .hr-profile-toolbar select {
+    max-width: 230px;
+  }
+  .hr-profile-toolbar .text-button {
+    text-align: left;
+  }
+  .people-grid {
+    grid-template-columns: 1fr;
+  }
+  .search-label,.search-label input {
+    width: 100%;
+  }
+  .import-actions {
+    flex-direction: column;
+  }
+  .import-panel {
+    padding: 23px 18px;
+  }
+  .table-wrap table {
+    min-width: 530px;
+  }
+  .panel {
+    min-width: 0;
+  }
+  .person-row small {
+    overflow-wrap: anywhere;
+  }
+  .page-heading>.secondary {
+    font-size: 10px;
+    padding: 8px;
+    min-height: 38px;
+  }
+  .page-heading>.secondary>.icon {
+    width: 14px;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after {
+    animation: none!important;
+    transition: none!important;
+    scroll-behavior: auto!important;
+  }
+}
