@@ -1,0 +1,134 @@
+{
+  "schema_version": "demo-v1",
+  "skills": [
+    { "id": "SK_PYTHON", "name": "Python", "kind": "hard" },
+    { "id": "SK_SYSTEM_DESIGN", "name": "System Design", "kind": "hard" },
+    { "id": "SK_PUBLIC_SPEAKING", "name": "Public Speaking", "kind": "soft" },
+    { "id": "SK_SQL", "name": "SQL", "kind": "hard" },
+    { "id": "SK_ANALYTICS", "name": "Аналитическое мышление", "kind": "hard" }
+  ],
+  "grade_rules": [
+    {
+      "role": "Backend Engineer",
+      "grade": "Middle",
+      "next_grade": "Senior",
+      "requirements": {
+        "SK_PYTHON": 4,
+        "SK_SYSTEM_DESIGN": 4,
+        "SK_PUBLIC_SPEAKING": 3
+      }
+    },
+    {
+      "role": "Data Analyst",
+      "grade": "Middle",
+      "next_grade": "Senior",
+      "requirements": {
+        "SK_SQL": 4,
+        "SK_ANALYTICS": 4,
+        "SK_PUBLIC_SPEAKING": 3
+      }
+    }
+  ],
+  "employees": [
+    {
+      "id": "E001",
+      "name": "Сотрудник 01",
+      "role": "Backend Engineer",
+      "grade": "Middle",
+      "tenure_months": 36,
+      "skills": {
+        "SK_PYTHON": 3,
+        "SK_SYSTEM_DESIGN": 2,
+        "SK_PUBLIC_SPEAKING": 1
+      }
+    },
+    {
+      "id": "E002",
+      "name": "Сотрудник 02",
+      "role": "Data Analyst",
+      "grade": "Middle",
+      "tenure_months": 24,
+      "skills": { "SK_SQL": 3, "SK_ANALYTICS": 2, "SK_PUBLIC_SPEAKING": 3 }
+    },
+    {
+      "id": "E003",
+      "name": "Сотрудник 03",
+      "role": "Backend Engineer",
+      "grade": "Senior",
+      "tenure_months": 58,
+      "skills": {
+        "SK_PYTHON": 5,
+        "SK_SYSTEM_DESIGN": 4,
+        "SK_PUBLIC_SPEAKING": 4
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "EV_DESIGN",
+      "title": "Архитектура сервиса: практикум",
+      "type": "workshop",
+      "roles": ["Backend Engineer"],
+      "grades": ["Middle"],
+      "effects": { "SK_SYSTEM_DESIGN": { "gain": 1, "max_level": 4 } }
+    },
+    {
+      "id": "EV_MENTOR",
+      "title": "Разбор архитектуры с наставником",
+      "type": "mentoring",
+      "roles": ["Backend Engineer"],
+      "grades": ["Middle"],
+      "effects": { "SK_SYSTEM_DESIGN": { "gain": 1, "max_level": 4 } }
+    },
+    {
+      "id": "EV_PYTHON",
+      "title": "Python: надёжность и производительность",
+      "type": "course",
+      "roles": ["Backend Engineer"],
+      "grades": ["Middle"],
+      "effects": { "SK_PYTHON": { "gain": 1, "max_level": 4 } }
+    },
+    {
+      "id": "EV_SPEAK",
+      "title": "Клуб публичных выступлений",
+      "type": "speaking_club",
+      "roles": [],
+      "grades": [],
+      "effects": { "SK_PUBLIC_SPEAKING": { "gain": 1, "max_level": 4 } }
+    },
+    {
+      "id": "EV_SQL",
+      "title": "SQL: исследование бизнес-кейса",
+      "type": "workshop",
+      "roles": ["Data Analyst"],
+      "grades": ["Middle"],
+      "effects": {
+        "SK_SQL": { "gain": 1, "max_level": 4 },
+        "SK_ANALYTICS": { "gain": 1, "max_level": 4 }
+      }
+    }
+  ],
+  "history": [
+    {
+      "id": "H001",
+      "employee_id": "E001",
+      "event_id": "EV_SPEAK",
+      "status": "missed",
+      "occurred_at": "2026-06-01"
+    },
+    {
+      "id": "H002",
+      "employee_id": "E001",
+      "event_id": "EV_SPEAK",
+      "status": "declined",
+      "occurred_at": "2026-07-01"
+    },
+    {
+      "id": "H003",
+      "employee_id": "E001",
+      "event_id": "EV_SPEAK",
+      "status": "missed",
+      "occurred_at": "2026-08-01"
+    }
+  ]
+}

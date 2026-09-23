@@ -1,0 +1,26 @@
+{
+  "schema_version": "demo-v1",
+  "employees": [
+    {
+      "id": "E004",
+      "name": "Новый профиль",
+      "role": "Backend Engineer",
+      "grade": "Middle",
+      "tenure_months": 30,
+      "skills": {
+        "SK_PYTHON": 4,
+        "SK_SYSTEM_DESIGN": 2,
+        "SK_PUBLIC_SPEAKING": 3
+      }
+    }
+  ],
+  "history": [
+    {
+      "id": "H004",
+      "employee_id": "E004",
+      "event_id": "EV_DESIGN",
+      "status": "declined",
+      "occurred_at": "2026-08-20"
+    }
+  ]
+}
