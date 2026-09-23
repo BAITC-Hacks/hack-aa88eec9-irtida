@@ -71,6 +71,20 @@ export type Recommendations = {
     model: string | null;
     elapsed_ms: number;
 };
+export type Personalization = {
+    mode: 'nvidia' | 'mock' | 'no_candidates';
+    model: string | null;
+    summary: string;
+    nextStep: string;
+    targetRole: string;
+    targetGrade: string | null;
+    focusSkills: { skillId: string; skill: string; reason: string; currentLevel: number; requiredLevel: number; gap: number; critical: boolean }[];
+    recommendedQuests: {
+        sourceEventId: string; sourceEventTitle: string; title: string; description: string; reason: string;
+        kind: 'practice_suggestion'; requiresReview: boolean;
+        estimatedImpact: { skill: string; fromLevel: number; toLevel: number; increase: number; basis: 'source_event_completion_only' };
+    }[];
+};
 export type Profile = {
     employee: Employee;
     skill_catalog?: (CatalogSkill & { level: number | null })[];

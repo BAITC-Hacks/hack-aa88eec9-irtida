@@ -62,6 +62,22 @@ test('personal motivation uses an existing recommendation and exact server gains
   }
 });
 
+test('NVIDIA practice is explicit, marked mock, grounded in a source event and hidden from team readers', () => {
+  const p = profile(); p.available = [candidate()]; p.employee.source_format = 'kit-v1';
+  const personalization = { mode: 'mock', model: null, summary: 'Synthetic practice', nextStep: 'Review',
+    recommendedQuests: [{ sourceEventId: 'EV_036', sourceEventTitle: 'Synthetic session', title: 'Plan a short design review',
+      description: 'Draft a design note and request a review.', reason: 'System Design gap', kind: 'practice_suggestion',
+      requiresReview: true, estimatedImpact: { skill: 'System Design', fromLevel: 0, toLevel: 1, increase: 1, basis: 'source_event_completion_only' } }] };
+  const props = { personalization, personalizationMode: 'mock', onPersonalize() {} };
+  const html = renderProfile(p, props);
+  assert.match(html, /Создать персональную практику|Обновить практику/);
+  assert.match(html, /Локальный пример без запроса к NVIDIA/);
+  assert.match(html, /Plan a short design review/);
+  assert.match(html, /Synthetic session · EV_036/);
+  assert.match(html, /Упражнение требует проверки и само не повышает навык/);
+  assert.doesNotMatch(renderProfile(p, { ...props, employee: false, canRecommend: false }), /Plan a short design review|Создать персональную практику/);
+});
+
 test('profile renders server critical flags and kit zero level without promoting at 100% coverage', () => {
   const p = profile();
   p.trajectory.coverage = 100; // Rounded coverage alone must never erase critical blockers.

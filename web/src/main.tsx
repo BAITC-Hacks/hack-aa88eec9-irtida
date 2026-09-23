@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { createRoot } from 'react-dom/client';
-import { api, ApiError, authenticate, completeEvent, type Account, type AuthMode, type AuthRequest, type AuthStatus, type Candidate, type Catalog, type Employee, type Metrics, type Profile, type Recommendations, type RegisteredAccount } from './api';
+import { api, ApiError, authenticate, completeEvent, type Account, type AuthMode, type AuthRequest, type AuthStatus, type Candidate, type Catalog, type Employee, type Metrics, type Personalization, type Profile, type Recommendations, type RegisteredAccount } from './api';
 import { I18nProvider, useI18n } from './i18n';
 import { Brand, Icon, type IconName } from './components/Icons';
 import { ProfileView, type Section, type Celebration } from './components/ProfileView';
@@ -32,6 +32,8 @@ function App() {
     const [people, setPeople] = useState<Employee[]>([]);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [recommendation, setRecommendation] = useState<Recommendations | null>(null);
+    const [personalization, setPersonalization] = useState<Personalization | null>(null);
+    const [personalizationMode, setPersonalizationMode] = useState<'disabled' | 'mock' | 'nvidia'>('disabled');
     const [metrics, setMetrics] = useState<Metrics | null>(null);
     const [catalog, setCatalog] = useState<Catalog | null>(null);
     const [accounts, setAccounts] = useState<RegisteredAccount[]>([]);
@@ -65,7 +67,7 @@ function App() {
     const profilePage = isProfilePage(page);
     function clearSession() {
         setAccount(null); setProfile(null); setPeople([]); setMetrics(null); setCatalog(null); setAccounts([]);
-        setRecommendation(null); setCelebration(null); appliedRoute.current = ''; setRouteFailed(false);
+        setRecommendation(null); setPersonalization(null); setCelebration(null); appliedRoute.current = ''; setRouteFailed(false);
     }
     function assignProfile(data: Profile) { setProfile(data); setRecommendation(data.recommendation); }
     async function loadProfile(id: string) { assignProfile(await api<Profile>(`/employees/${encodeURIComponent(id)}`)); }
@@ -95,7 +97,7 @@ function App() {
         try {
             if (!canOpenRoute(who, next)) throw new Error(t('Этот раздел недоступен для вашей роли.', 'This section is not available for your role.', 'Бұл бөлім сіздің рөліңізге қолжетімді емес.'));
             if (isProfilePage(next.page) && next.employeeId) {
-                if (profile?.employee.id !== next.employeeId) { setProfile(null); setRecommendation(null); setCelebration(null); }
+                if (profile?.employee.id !== next.employeeId) { setProfile(null); setRecommendation(null); setPersonalization(null); setCelebration(null); }
                 await Promise.all([
                     loadProfile(next.employeeId),
                     who.role === 'hr' || managesTeam(who.role)
@@ -113,7 +115,8 @@ function App() {
     async function boot() {
         setBooting(true); setError('');
         try {
-            setAuthStatus(await api<AuthStatus>('/auth/status'));
+            const [status, health] = await Promise.all([api<AuthStatus>('/auth/status'), api<{ personalization_mode: 'disabled' | 'mock' | 'nvidia' }>('/health')]);
+            setAuthStatus(status); setPersonalizationMode(health.personalization_mode);
             let who: Account | null = null;
             try { who = await api<Account>('/auth/me'); }
             catch (reason) { if (!(reason instanceof ApiError && reason.status === 401)) throw reason; }
@@ -180,7 +183,7 @@ function App() {
         if (!profile) return;
         const oldProfile = profile;
         await run('complete', async () => {
-            const result = await completeEvent(oldProfile.employee.id, event); assignProfile(result.profile);
+            const result = await completeEvent(oldProfile.employee.id, event); assignProfile(result.profile); setPersonalization(null);
             const completion = result.profile.history.find(item => !oldProfile.history.some(previous => previous.id === item.id));
             const gains = result.already_completed ? [] : Object.values(completion?.changes ?? {}).map(change => `${change.name}: ${change.before} → ${change.after}`);
             setCelebration({ title: event.title, before: percent(oldProfile.trajectory.coverage), after: percent(result.profile.trajectory.coverage), gains, already: result.already_completed });
@@ -201,7 +204,7 @@ function App() {
     else if ((page === 'catalog' || page === 'skill-catalog') && account.role === 'hr' && catalog) content = <CatalogView key={page} catalog={catalog} kind={page === 'catalog' ? 'events' : 'skills'} busy={!!busy} refresh={() => void run('refresh', refreshCatalog)}/>;
     else if (page === 'imports' && account.role === 'hr') content = <><div className="page-heading"><div><span className="eyebrow">{t('HR · ДАННЫЕ КОМАНДЫ', 'HR · TEAM DATA', 'HR · КОМАНДА ДЕРЕКТЕРІ')}</span><h1>{t('Импорт данных', 'Data import', 'Деректер импорты')}</h1><p className="muted">{t('Добавляйте профили, историю, навыки и активности из исходных файлов.', 'Add profiles, history, skills and activities from source files.', 'Бастапқы файлдардан профильдерді, тарихты, дағдыларды және іс-шараларды қосыңыз.')}</p></div></div><ImportPanel busy={busy} run={run} onImported={refreshAfterImport}/></>;
     else if (page === 'accounts' && account.role === 'hr') content = <AccountsView accounts={accounts} people={people} busy={busy} run={run} refresh={refreshAccounts}/>;
-    else if (profilePage && profile && profile.employee.id === route.employeeId) content = <ProfileView profile={profile} recommendation={recommendation} section={page as Section} employee={isStaffRole(account.role) && profile.employee.id === account.employee_id} canRecommend={account.role === 'hr' || (isStaffRole(account.role) && profile.employee.id === account.employee_id)} busy={busy} onRecommend={() => void run('recommend', async () => setRecommendation(await api<Recommendations>(`/employees/${encodeURIComponent(profile.employee.id)}/recommendations`, { method: 'POST' })))} onComplete={event => void complete(event)} onNavigate={navigate} celebration={celebration} clearCelebration={() => setCelebration(null)}/>;
+    else if (profilePage && profile && profile.employee.id === route.employeeId) content = <ProfileView profile={profile} recommendation={recommendation} personalization={personalization} personalizationMode={personalizationMode} section={page as Section} employee={isStaffRole(account.role) && profile.employee.id === account.employee_id} canRecommend={account.role === 'hr' || (isStaffRole(account.role) && profile.employee.id === account.employee_id)} busy={busy} onRecommend={() => void run('recommend', async () => setRecommendation(await api<Recommendations>(`/employees/${encodeURIComponent(profile.employee.id)}/recommendations`, { method: 'POST' })))} onPersonalize={() => void run('personalize', async () => setPersonalization(await api<Personalization>(`/employees/${encodeURIComponent(profile.employee.id)}/personalization`, { method: 'POST' })))} onComplete={event => void complete(event)} onNavigate={navigate} celebration={celebration} clearCelebration={() => setCelebration(null)}/>;
     else content = <div className="panel empty-support"><Icon name="compass"/><h1>{t('Данные ещё не загрузились', 'Data is not loaded yet', 'Деректер әлі жүктелмеді')}</h1><button className="primary" disabled={!!busy} onClick={() => void run('refresh', refreshCurrent)}>{t('Попробовать снова', 'Try again', 'Қайталап көру')}</button></div>;
     const homeHref = routeHref(homeRoute(account));
     const accountLabel = account.role === 'client' ? t('Личный кабинет', 'Personal account', 'Жеке кабинет') : t('Мой аккаунт', 'My account', 'Менің аккаунтым');

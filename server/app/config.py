@@ -20,7 +20,10 @@ class Settings:
     openai_key: str = field(default_factory=lambda: os.getenv('OPENAI_API_KEY', ''), repr=False)
     openai_model: str = field(default_factory=lambda: os.getenv('OPENAI_MODEL', 'gpt-4.1-mini'))
     nvidia_key: str = field(default_factory=lambda: os.getenv('NVIDIA_API_KEY', ''), repr=False)
-    nvidia_model: str = field(default_factory=lambda: os.getenv('NVIDIA_MODEL', 'meta/llama-3.3-70b-instruct'))
+    nvidia_model: str = field(default_factory=lambda: os.getenv('NVIDIA_MODEL', 'nvidia/nemotron-3-super-120b-a12b'))
+    nvidia_ai_mock: bool = field(default_factory=lambda: os.getenv('NVIDIA_AI_MOCK', 'false').lower() == 'true')
+    nvidia_timeout_seconds: float = field(default_factory=lambda: float(os.getenv('NVIDIA_TIMEOUT_SECONDS', '8')))
+    nvidia_max_tokens: int = field(default_factory=lambda: int(os.getenv('NVIDIA_MAX_TOKENS', '1800')))
     timeout: float = field(default_factory=lambda: float(os.getenv('AI_TIMEOUT_SECONDS', '7')))
     per_minute: int = field(default_factory=lambda: int(os.getenv('AI_REQUESTS_PER_MINUTE', '6')))
     per_day: int = field(default_factory=lambda: int(os.getenv('AI_REQUESTS_PER_DAY', '300')))
@@ -35,6 +38,10 @@ class Settings:
         if not math.isfinite(self.timeout) or self.timeout <= 0:
             raise ValueError('AI_TIMEOUT_SECONDS must be a positive finite number')
         self.timeout = min(8.0, self.timeout)
+        if not math.isfinite(self.nvidia_timeout_seconds) or not 0.05 <= self.nvidia_timeout_seconds <= 8:
+            raise ValueError('NVIDIA_TIMEOUT_SECONDS must be between 0.05 and 8')
+        if not 128 <= self.nvidia_max_tokens <= 4096:
+            raise ValueError('NVIDIA_MAX_TOKENS must be between 128 and 4096')
         if self.per_minute < 0 or self.per_day < 0:
             raise ValueError('AI request limits must be nonnegative')
         self.allowed_origins = tuple(origin.strip() for origin in self.allowed_origins if origin.strip())

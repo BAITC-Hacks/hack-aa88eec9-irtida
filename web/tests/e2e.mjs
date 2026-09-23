@@ -63,7 +63,7 @@ async function apiGet(path) { const response = await page.request.get(`${origin}
 try {
   const launcher = "import sys,threading,uvicorn; server=uvicorn.Server(uvicorn.Config('app.main:app',host='127.0.0.1',port=int(sys.argv[1]),access_log=False,log_level='warning')); threading.Thread(target=lambda:(sys.stdin.read(),setattr(server,'should_exit',True)),daemon=True).start(); server.run()";
   backend = spawn(python, ['-c', launcher, String(port)], { cwd: join(root, 'server'), windowsHide: true,
-    env: { ...process.env, DATABASE_URL: `sqlite:///${join(temporary, 'e2e.db').replaceAll('\\', '/')}`, CAREER_QUEST_AUTO_IMPORT: 'false', CAREER_QUEST_KIT_DIR: '', DEMO_MODE: 'false', AI_PROVIDER: 'rules', OPENAI_API_KEY: '', NVIDIA_API_KEY: '', AI_DATA_POLICY_APPROVED: 'false', ALLOWED_ORIGINS: origin, COOKIE_SECURE: 'false' }, stdio: ['pipe', 'pipe', 'pipe'] });
+    env: { ...process.env, DATABASE_URL: `sqlite:///${join(temporary, 'e2e.db').replaceAll('\\', '/')}`, CAREER_QUEST_AUTO_IMPORT: 'false', CAREER_QUEST_KIT_DIR: '', DEMO_MODE: 'false', AI_PROVIDER: 'rules', OPENAI_API_KEY: '', NVIDIA_API_KEY: '', NVIDIA_AI_MOCK: 'true', AI_DATA_POLICY_APPROVED: 'false', ALLOWED_ORIGINS: origin, COOKIE_SECURE: 'false' }, stdio: ['pipe', 'pipe', 'pipe'] });
   for (const stream of [backend.stdout, backend.stderr]) stream.on('data', chunk => { backendLogs = (backendLogs + chunk).slice(-5000); });
   for (let attempt = 0; attempt < 100; attempt++) {
     if (backend.exitCode !== null) throw new Error(`Backend exited: ${backendLogs}`);
@@ -123,6 +123,7 @@ try {
   await page.locator('.profile-tabs').getByRole('link', { name: 'История', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'История вашего пути' })).toBeVisible();
   await expect(page).toHaveURL(/#\/employees\/TEST_EMP_0\/history$/);
+  await expect(page.locator('.breadcrumb a[aria-current=page]')).toHaveAttribute('href', '#/employees/TEST_EMP_0/history');
   const selectedHref = await page.locator('.breadcrumb a[aria-current=page]').getAttribute('href');
   assert.equal(selectedHref, '#/employees/TEST_EMP_0/history');
   await page.locator('.breadcrumb a[aria-current=page]').click();
@@ -159,10 +160,15 @@ try {
   await page.locator('[name=invite_code]').fill(invite);
   await page.getByRole('button', { name: 'Создать аккаунт', exact: true }).click(); await idle();
   await expect(sideButton('Мой путь')).toBeVisible();
+  const beforePractice = await apiGet('/employees/TEST_EMP_0');
+  await page.locator('.personalization-panel').getByRole('button', { name: 'Создать персональную практику' }).click(); await idle();
+  await expect(page.locator('.personalization-panel')).toContainText('Локальный пример без запроса к NVIDIA');
+  await expect(page.locator('.personalization-panel .quest-card')).toHaveCount(3);
+  assert.deepEqual((await apiGet('/employees/TEST_EMP_0')).employee.skills, beforePractice.employee.skills);
   const before = await apiGet('/employees/TEST_EMP_0');
   await sideButton('Мои квесты').click();
   await page.getByRole('button', { name: 'Подобрать квесты', exact: true }).click(); await idle();
-  await expect(page.locator('.mode-banner')).toContainText('Подбор по правилам');
+  await expect(page.locator('.quests-section .mode-banner')).toContainText('Подбор по правилам');
   await sideButton('Мой путь').click();
   await expect(page.locator('.hero-next-step')).toBeVisible();
   await page.screenshot({ path: join(results, '04-next-step-benefit.png'), fullPage: false });
@@ -271,7 +277,7 @@ try {
   page.off('request', watchClient);
   await page.screenshot({ path: join(results, '06-client-cabinet.png'), fullPage: false });
   assert.deepEqual(messages, []);
-  console.log('PASS browser E2E: explicit HR setup, demo preview + kit import, 5 HR pages, 40 events, 60 skills, 6 roles, invitation, registration, password login, real breadcrumb links, selected profile reload/direct URL/back/forward, own account, completion persistence + Back during POST without replay, manager scoped team + read-only report, public client isolation, ru/en/kk, desktop + phone, no JavaScript errors.');
+  console.log('PASS browser E2E: explicit HR setup, demo preview + kit import, 5 HR pages, 40 events, 60 skills, 6 roles, invitation, registration, password login, NVIDIA mock practice without skill mutation, real breadcrumb links, selected profile reload/direct URL/back/forward, own account, completion persistence + Back during POST without replay, manager scoped team + read-only report, public client isolation, ru/en/kk, desktop + phone, no JavaScript errors.');
   console.log(`Screenshots: ${results}`);
 } catch (error) {
   if (page) await page.screenshot({ path: join(results, 'failure.png'), fullPage: true }).catch(() => {});

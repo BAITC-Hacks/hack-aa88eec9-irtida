@@ -15,6 +15,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.exc import OperationalError
 
 from .ai import providers
+from .ai.personalization_routes import install_personalization_routes
 from .auth import STAFF_ROLES, authenticated_account, install_auth_routes
 from .bootstrap import bootstrap_data
 from .config import ROOT, Settings
@@ -116,12 +117,14 @@ def create_app(settings: Settings | None = None):
         ).order_by(Employee.id)))
 
     install_auth_routes(app, settings, hr)
+    install_personalization_routes(app, settings, user)
 
     @app.get(f'{API}/health')
     def health():
         with app.state.sessions() as db:
             db.execute(text('SELECT 1'))
-        return {'status': 'ok', 'demo_mode': settings.demo_mode, 'ai_provider': settings.provider}
+        return {'status': 'ok', 'demo_mode': settings.demo_mode, 'ai_provider': settings.provider,
+                'personalization_mode': 'mock' if settings.nvidia_ai_mock else 'nvidia' if settings.provider == 'nvidia' else 'disabled'}
 
     @app.get(f'{API}/auth/demo-accounts')
     def demo_accounts():
