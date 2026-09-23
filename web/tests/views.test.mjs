@@ -23,6 +23,45 @@ function renderProfile(p, overrides = {}) {
   return renderToStaticMarkup(createElement(ProfileView, { profile: p, recommendation: p.recommendation, section: 'profile', employee: true, busy: '', onRecommend() {}, onComplete() {}, onNavigate() {}, celebration: null, clearCelebration() {}, ...overrides }));
 }
 
+test('read-only team profiles keep eligible activities and cached evidence without recommendation or completion actions', () => {
+  const p = profile(); p.available = [candidate()];
+  const readonly = () => renderProfile(p, { employee: false, canRecommend: false });
+  let html = readonly();
+  assert.match(html, /Режим просмотра команды/);
+  assert.match(html, /Synthetic session/);
+  assert.doesNotMatch(html, /Подобрать квесты|Построить мой маршрут|Отметить выполненным/);
+  p.recommendation = { items: [candidate()], mode: 'rules', reason: null, cached: true, elapsed_ms: 1 };
+  html = readonly();
+  assert.match(html, /Requirement gap/);
+  assert.doesNotMatch(html, /Обновить подбор|Отметить выполненным|hero-next-step/);
+});
+
+test('personal motivation uses an existing recommendation and exact server gains without invoking AI', () => {
+  const p = profile(); const event = candidate(); p.available = [event];
+  let requests = 0;
+  const overrides = { onRecommend() { requests += 1; } };
+  assert.doesNotMatch(renderProfile(p, overrides), /hero-next-step/);
+  p.recommendation = { items: [event], mode: 'rules', reason: null, cached: true, elapsed_ms: 1 };
+  const html = renderProfile(p, overrides);
+  const motivation = html.match(/<div class="hero-next-step">([\s\S]*?)<\/div>/)?.[1];
+  assert.ok(motivation);
+  assert.match(motivation, /Следующий шаг с понятной пользой: Synthetic session/);
+  assert.match(motivation, /После активности: System Design: 0 → 1/);
+  assert.match(motivation, /Связь с карьерной целью: Requirement gap/);
+  assert.match(motivation, /Вы выбираете, когда учиться/);
+  assert.doesNotMatch(motivation, /AI|100%|XP/);
+  assert.equal(requests, 0);
+  for (const [locale, label, after, connection] of [
+    ['en', 'A next step with a clear benefit', 'After this activity:', 'Connection to your career goal:'],
+    ['kk', 'Пайдасы түсінікті келесі қадам', 'Іс-шарадан кейін:', 'Мансаптық мақсатпен байланысы:'],
+  ]) {
+    const localized = renderToStaticMarkup(createElement(I18nProvider, { initialLocale: locale }, createElement(ProfileView, { profile: p, recommendation: p.recommendation, section: 'profile', employee: true, busy: '', onRecommend() {}, onComplete() {}, onNavigate() {}, celebration: null, clearCelebration() {} })));
+    assert.ok(localized.includes(label));
+    assert.ok(localized.includes(`${after} System Design: 0 → 1`));
+    assert.ok(localized.includes(`${connection} Requirement gap`));
+  }
+});
+
 test('profile renders server critical flags and kit zero level without promoting at 100% coverage', () => {
   const p = profile();
   p.trajectory.coverage = 100; // Rounded coverage alone must never erase critical blockers.

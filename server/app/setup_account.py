@@ -21,7 +21,7 @@ def main():
     engine, sessions = connect(Settings().database_url)
     try:
         with sessions() as db:
-            if db.scalar(select(UserAccount.id).limit(1)) is not None:
+            if db.scalar(select(UserAccount.id).where(UserAccount.role != 'client').limit(1)) is not None:
                 print('Initial setup is already complete. Sign in with the existing account.')
                 return 1
         username = input('Username: ')

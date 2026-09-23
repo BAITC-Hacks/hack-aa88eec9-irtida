@@ -172,6 +172,56 @@ def test_validation_errors_translate_but_keep_field_paths_and_do_not_echo_secret
     assert 'input' not in issue
 
 
+@pytest.mark.parametrize(('locale', 'client_error', 'staff_error', 'team_error'), [
+    ('en', 'Clients register without an employee invitation', 'An HR invitation is required for an internal account', 'Only team leaders can access this resource'),
+    ('kk', 'Клиент қызметкер шақыруынсыз тіркеледі', 'Ішкі есептік жазба үшін HR шақыруы қажет', 'Бұл ресурс тек команда басшылары үшін қолжетімді'),
+    ('ru', 'Клиент регистрируется без приглашения сотрудника', 'Для внутренней учётной записи требуется приглашение HR', 'Доступ разрешён только руководителю команды'),
+])
+def test_role_registration_and_team_errors_are_localized_without_disclosing_input(client, locale, client_error, staff_error, team_error):
+    credentials = {'username': 'private-user', 'password': 'synthetic-private-password'}
+    headers = {'Accept-Language': locale}
+    invalid_client = client.post('/api/v1/auth/register', json={**credentials, 'role': 'client', 'display_name': 'Private name', 'invite_code': 'private-invitation-' * 3}, headers=headers)
+    invalid_staff = client.post('/api/v1/auth/register', json={**credentials, 'role': 'manager'}, headers=headers)
+    for response, expected in ((invalid_client, client_error), (invalid_staff, staff_error)):
+        assert response.status_code == 422
+        assert response.json()['detail'][0] == {'loc': ['body'], 'msg': expected, 'type': 'value_error'}
+        assert response.headers['content-language'] == locale
+        assert 'accept-language' in response.headers['vary'].lower()
+        assert not response.cookies
+        for private in ('private-user', 'synthetic-private-password', 'Private name', 'private-invitation-'):
+            assert private not in response.text
+    assert client.post('/api/v1/auth/demo', json={'account': 'E001'}).status_code == 200
+    denied = client.get('/api/v1/team/employees', headers=headers)
+    assert denied.status_code == 403 and denied.json() == {'detail': team_error}
+
+
+@pytest.mark.parametrize('locale', ['ru', 'en', 'kk'])
+@pytest.mark.parametrize(('endpoint', 'allowed'), [
+    ('/auth/login', ['employee', 'hr', 'manager', 'operator', 'supervisor', 'client']),
+    ('/hr/invitations', ['employee', 'hr', 'manager', 'operator', 'supervisor']),
+])
+def test_six_login_and_five_invitation_role_literals_keep_exact_allowed_values(client, locale, endpoint, allowed):
+    if endpoint == '/hr/invitations':
+        assert client.post('/api/v1/auth/demo', json={'account': 'hr'}).status_code == 200
+    body = {'role': 'private-invalid-role'}
+    if endpoint == '/auth/login':
+        body.update(username='private-user', password='synthetic-private-password')
+    canonical = client.post('/api/v1' + endpoint, json=body)
+    assert canonical.status_code == 422
+    assert canonical.json()['detail'][0]['msg'].startswith('Input should be ')
+    response = client.post('/api/v1' + endpoint, json=body, headers={'Accept-Language': locale})
+    assert response.status_code == 422
+    issue = response.json()['detail'][0]
+    assert issue['loc'] == ['body', 'role'] and issue['type'] == 'literal_error'
+    assert {'ru': 'Ожидается', 'en': 'Input should be', 'kk': 'рөлдерінің бірі қажет'}[locale] in issue['msg']
+    for role in allowed:
+        assert role in issue['msg']
+    if endpoint == '/hr/invitations':
+        assert 'client' not in issue['msg']
+    assert 'private-' not in response.text
+    assert not response.cookies
+
+
 def test_middleware_handles_json_shapes_chunking_headers_and_non_json_safely():
     async def shaped(request):
         payload = {'reason': {'unrecognized': True}, 'factor': 'history', 'text': 'Old text', 'facts': [1], 'events': [None, {'roles': 7}], 'skills': []}

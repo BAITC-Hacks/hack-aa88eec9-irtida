@@ -15,7 +15,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.exc import OperationalError
 
 from .ai import providers
-from .auth import authenticated_account, install_auth_routes
+from .auth import STAFF_ROLES, authenticated_account, install_auth_routes
 from .bootstrap import bootstrap_data
 from .config import ROOT, Settings
 from .db import AIRequest, Activity, Catalog, Employee, LoginSession, Recommendation, connect
@@ -92,9 +92,28 @@ def create_app(settings: Settings | None = None):
             raise HTTPException(403, 'Доступ разрешён только HR')
         return account
 
-    def authorize(account, employee_id, allow_hr=True):
-        if account['employee_id'] != employee_id and not (allow_hr and account['role'] == 'hr'):
-            raise HTTPException(403, 'Нет доступа к этому профилю')
+    def authorize(account, employee_id, allow_hr=True, allow_reports=False):
+        if account['role'] in STAFF_ROLES and account['employee_id'] == employee_id:
+            return
+        if allow_hr and account['role'] == 'hr':
+            return
+        if allow_reports and account['role'] in {'manager', 'supervisor'}:
+            with app.state.sessions() as db:
+                employee = db.get(Employee, employee_id)
+                if employee and employee.profile.get('manager_id') == account['employee_id']:
+                    return
+        raise HTTPException(403, 'Нет доступа к этому профилю')
+
+    def team_leader(account=Depends(user)):
+        if account['role'] not in {'manager', 'supervisor'}:
+            raise HTTPException(403, 'Доступ разрешён только руководителю команды')
+        return account
+
+    def direct_reports(db, employee_id):
+        return list(db.scalars(select(Employee).where(
+            Employee.profile['manager_id'].as_string() == employee_id,
+            Employee.id != employee_id,
+        ).order_by(Employee.id)))
 
     install_auth_routes(app, settings, hr)
 
@@ -156,6 +175,18 @@ def create_app(settings: Settings | None = None):
         with app.state.sessions() as db:
             return [e.profile for e in db.scalars(select(Employee).order_by(Employee.id))]
 
+    @app.get(f'{API}/team/employees')
+    def team_employees(account=Depends(team_leader)):
+        with app.state.sessions() as db:
+            return [employee.profile for employee in direct_reports(db, account['employee_id'])]
+
+    @app.get(f'{API}/team/overview')
+    def team_overview(account=Depends(team_leader)):
+        with app.state.sessions() as db:
+            db.connection().exec_driver_sql('BEGIN')
+            employee_ids = [employee.id for employee in direct_reports(db, account['employee_id'])]
+            return hr_overview(db, employee_ids=employee_ids)
+
     @app.get(f'{API}/catalog')
     def catalog(account=Depends(hr)):
         with app.state.sessions() as db:
@@ -166,7 +197,7 @@ def create_app(settings: Settings | None = None):
 
     @app.get(f'{API}/employees/{{employee_id}}')
     def profile(employee_id: str, account=Depends(user)):
-        authorize(account, employee_id)
+        authorize(account, employee_id, allow_reports=True)
         with app.state.sessions() as db:
             db.connection().exec_driver_sql('BEGIN')
             view = employee_view(db, employee_id)

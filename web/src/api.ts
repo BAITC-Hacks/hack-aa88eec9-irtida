@@ -1,16 +1,17 @@
 import { getLocale, translate } from './i18n';
+import type { AccountRole, InternalRole } from './roles';
 
 export type Account = {
-    role: "employee" | "hr";
+    role: AccountRole;
     employee_id: string | null;
     username?: string;
     display_name?: string;
 };
 export type AuthStatus = { setup_required: boolean; registration: 'invite'; demo_enabled: boolean };
-export type AuthRequest = { username: string; password: string; role: 'employee' | 'hr'; invite_code?: string; display_name?: string };
+export type AuthRequest = { username: string; password: string; role: AccountRole; invite_code?: string; display_name?: string };
 export type AuthMode = 'login' | 'register' | 'setup';
 export type RegisteredAccount = Account & { id: string; username: string; display_name: string; created_at: number };
-export type Invitation = { invite_code: string; role: Account['role']; employee_id: string | null; expires_at: number };
+export type Invitation = { invite_code: string; role: InternalRole; employee_id: string | null; expires_at: number };
 export type CatalogSkill = { id: string; name: string; kind: 'hard' | 'soft'; category?: string; description?: string };
 export type CatalogEvent = {
     id: string; title: string; type: string; roles: string[]; grades: string[];
@@ -30,6 +31,7 @@ export type Employee = {
     name: string;
     role: string;
     role_label?: string;
+    manager_id?: string | null;
     grade: string;
     tenure_months: number;
     skills: Record<string, number>;
@@ -232,7 +234,8 @@ export function importKit(files: readonly File[], dryRun: boolean, replaceDemo: 
 export function authenticate(mode: AuthMode, request: AuthRequest): Promise<Account> {
     const { username, password, role, display_name, invite_code } = request;
     const body = mode === 'setup' ? { username, password, display_name }
-        : mode === 'register' ? { username, password, role, invite_code } : { username, password, role };
+        : mode === 'register' ? role === 'client' ? { username, password, role, display_name }
+            : { username, password, role, invite_code } : { username, password, role };
     return api<Account>(`/auth/${mode}`, { method: 'POST', body: JSON.stringify(body) });
 }
 

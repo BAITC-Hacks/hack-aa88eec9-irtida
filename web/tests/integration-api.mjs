@@ -280,6 +280,13 @@ try {
   assert.deepEqual({ ...authStatus }, { setup_required: true, registration: 'invite', demo_enabled: false });
   assert.deepEqual(await api('/auth/demo-accounts'), { enabled: false, accounts: [] });
   await expectStatus(() => login('hr'), 403);
+  const clientCredentials = { username: 'http.integration.client', password: randomBytes(24).toString('base64url'), role: 'client', display_name: 'Contact centre client' };
+  const clientAccount = capture('Account', await authenticate('register', clientCredentials));
+  assert.equal(clientAccount.role, 'client');
+  assert.equal(clientAccount.employee_id, null);
+  assert.equal((await api('/auth/status')).setup_required, true, 'Public registration must not prevent the first HR from setting up');
+  for (const path of ['/employees', '/catalog', '/hr/accounts', '/team/employees']) await expectStatus(() => api(path), 403);
+  await api('/auth/logout', { method: 'POST' });
   const hrCredentials = { username: 'http.integration.hr', password: randomBytes(24).toString('base64url'), role: 'hr', display_name: 'HTTP integration HR' };
   const hrAccount = capture('Account', await authenticate('setup', hrCredentials));
   assert.equal(hrAccount.role, 'hr');
@@ -364,10 +371,62 @@ try {
   await api('/auth/logout', { method: 'POST' });
   capture('Account', await authenticate('login', hrCredentials));
   const registered = capture('RegisteredAccount[]', await api('/hr/accounts'));
-  assert.equal(registered.length, 2);
+  assert.equal(registered.length, 3);
   assert.ok(registered.some(account => account.employee_id === businessId && account.role === 'employee'));
   assert.ok(registered.every(account => !('password' in account) && !('password_hash' in account)));
   assert.equal((await api('/catalog')).counts.events, 40);
+
+  // Use the original manager_id relationships, never role titles or a global
+  // employee list as an authorization substitute. Leaders retain their own path.
+  const usedProfiles = new Set([businessId]);
+  for (const role of ['manager', 'supervisor', 'operator']) {
+    if (role !== 'manager') capture('Account', await authenticate('login', hrCredentials));
+    const person = realEmployees.find(employee => !usedProfiles.has(employee.id) && (role === 'operator'
+      ? employee.role === 'Customer Support Specialist'
+      : realEmployees.some(report => report.id !== employee.id && report.manager_id === employee.id)));
+    assert.ok(person, `Kit must contain an unused profile suitable for the ${role} account scenario`);
+    usedProfiles.add(person.id);
+    const roleInvite = capture('Invitation', await api('/hr/invitations', {
+      method: 'POST', body: JSON.stringify({ role, employee_id: person.id }),
+    }));
+    const credentials = { username: `http.integration.${role}`, password: randomBytes(24).toString('base64url'), role, invite_code: roleInvite.invite_code };
+    const account = capture('Account', await authenticate('register', credentials));
+    assert.equal(account.role, role);
+    assert.equal(account.employee_id, person.id);
+    assert.equal((await getProfile(person.id)).employee.role, person.role, 'Account permissions must not change the Kit career role');
+    for (const path of ['/hr/overview', '/hr/accounts', '/employees', '/catalog']) await expectStatus(() => api(path), 403);
+    if (role === 'operator') {
+      await expectStatus(() => api('/team/employees'), 403);
+      await expectStatus(() => api('/team/overview'), 403);
+      await expectStatus(() => api(`/employees/${businessId}`), 403);
+    } else {
+      const expectedReports = realEmployees.filter(report => report.id !== person.id && report.manager_id === person.id);
+      const reports = capture('Employee[]', await api('/team/employees'));
+      assert.deepEqual(reports.map(report => report.id).sort(), expectedReports.map(report => report.id).sort());
+      const metrics = capture('Metrics', await api('/team/overview'));
+      assert.equal(metrics.employee_count, reports.length);
+      assert.ok(metrics.no_step.every(report => reports.some(item => item.id === report.id)));
+      assert.ok(metrics.gaps.every(gap => gap.eligible <= reports.length && gap.affected <= reports.length));
+      const scopedHistory = [];
+      for (const report of reports) scopedHistory.push(...(await getProfile(report.id)).history);
+      assert.deepEqual(metrics.participation.map(event => event.id).sort(), [...new Set(scopedHistory.map(item => item.event_id))].sort());
+      for (const event of metrics.participation) {
+        for (const status of ['completed', 'in_progress', 'dropped', 'no_show', 'declined', 'overdue']) {
+          assert.equal(event[status], scopedHistory.filter(item => item.event_id === event.id && item.status === status).length);
+        }
+      }
+      const reportId = reports[0].id;
+      await expectStatus(() => api(`/employees/${reportId}/recommendations`, { method: 'POST' }), 403);
+      await expectStatus(() => api(`/employees/${reportId}/events/EV_001/complete`, { method: 'POST' }), 403);
+      const outsider = realEmployees.find(employee => employee.id !== person.id && !reports.some(report => report.id === employee.id));
+      await expectStatus(() => api(`/employees/${outsider.id}`), 403);
+    }
+    await api('/auth/logout', { method: 'POST' });
+  }
+  capture('Account', await authenticate('login', clientCredentials));
+  for (const path of ['/employees', `/employees/${businessId}`, '/catalog', '/hr/overview', '/hr/accounts', '/team/employees', '/team/overview']) await expectStatus(() => api(path), 403);
+  await expectStatus(() => api(`/employees/${businessId}/recommendations`, { method: 'POST' }), 403);
+  await expectStatus(() => api(`/employees/${businessId}/events/EV_001/complete`, { method: 'POST' }), 403);
 
   // Generic constraints validate required DTO fields against real JSON while
   // allowing harmless additional backend fields (plain satisfies rejects extras).
@@ -385,7 +444,7 @@ try {
   if (typecheck.status !== 0) writeFileSync(join(temporary, 'type-errors.log'), `${typecheck.stdout}\n${typecheck.stderr}`);
   assert.equal(typecheck.status, 0, 'Actual HTTP JSON does not satisfy frontend DTOs; see private type-errors.log.');
   passed = true;
-  console.log(`PASS live HTTP integration: ${contracts.length} typed response snapshots; Kit import/reimport/422, rules/fallback, ordinary and two EV_036 completions, HR totals, persistence; real HR setup/password login/invite registration, Sales/Support development, role/privacy checks and ru/en/kk ID/progress invariance.`);
+  console.log(`PASS live HTTP integration: ${contracts.length} typed response snapshots; Kit import/reimport/422, rules/fallback, ordinary and two EV_036 completions, HR totals, persistence; six account roles, client before HR setup, direct-report scope/read-only access, Sales/Support development and ru/en/kk ID/progress invariance.`);
 } catch (error) {
   // Assertion and compiler diagnostics may contain real Kit values. Keep them
   // only in this ignored local run directory, never in console/CI output.

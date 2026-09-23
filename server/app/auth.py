@@ -17,6 +17,9 @@ from .schemas import Identifier, StrictModel
 SESSION_SECONDS = 8 * 60 * 60
 INVITATION_SECONDS = 24 * 60 * 60
 SCRYPT_N, SCRYPT_R, SCRYPT_P = 2**17, 8, 1
+STAFF_ROLES = frozenset({'employee', 'manager', 'operator', 'supervisor'})
+ACCOUNT_ROLES = STAFF_ROLES | {'hr', 'client'}
+AccountRole = Literal['employee', 'hr', 'manager', 'operator', 'supervisor', 'client']
 # Each derivation uses about 128 MiB. Bound concurrent unauthenticated work so
 # a burst cannot allocate one such buffer for every FastAPI worker thread.
 _password_slots = threading.BoundedSemaphore(2)
@@ -64,7 +67,7 @@ class Credentials(StrictModel):
 
 
 class LoginInput(Credentials):
-    role: Literal['employee', 'hr']
+    role: AccountRole
 
 
 class SetupInput(Credentials):
@@ -80,16 +83,29 @@ class SetupInput(Credentials):
 
 
 class RegisterInput(LoginInput):
-    invite_code: str = Field(min_length=32, max_length=128)
+    invite_code: str | None = Field(default=None, min_length=32, max_length=128)
+    display_name: str | None = Field(default=None, min_length=1, max_length=120)
+
+    @model_validator(mode='after')
+    def registration_kind(self):
+        if self.role == 'client':
+            if self.invite_code is not None:
+                raise ValueError('Клиент регистрируется без приглашения сотрудника')
+            if self.display_name is None or not self.display_name.strip():
+                raise ValueError('Укажите имя')
+            self.display_name = self.display_name.strip()
+        elif self.invite_code is None:
+            raise ValueError('Для внутренней учётной записи требуется приглашение HR')
+        return self
 
 
 class InvitationInput(StrictModel):
-    role: Literal['employee', 'hr']
+    role: Literal['employee', 'hr', 'manager', 'operator', 'supervisor']
     employee_id: Identifier | None = None
 
     @model_validator(mode='after')
     def role_link(self):
-        if (self.role == 'employee') != (self.employee_id is not None):
+        if (self.role in STAFF_ROLES) != (self.employee_id is not None):
             raise ValueError('Сотруднику нужен employee_id; приглашение HR не привязывается к профилю')
         return self
 
@@ -107,12 +123,14 @@ def authenticated_account(db, token, *, allow_demo=False):
     link = db.get(AccountSession, token_hash)
     if link:
         account = db.get(UserAccount, link.account_id)
-        if account is None or account.role not in {'employee', 'hr'}:
+        if account is None or account.role not in ACCOUNT_ROLES:
             raise HTTPException(401, 'Войдите в приложение')
-        if account.role == 'employee' and (not account.employee_id or db.get(Employee, account.employee_id) is None):
+        if account.role in STAFF_ROLES and (not account.employee_id or db.get(Employee, account.employee_id) is None):
+            raise HTTPException(401, 'Профиль учётной записи недоступен')
+        if account.role not in STAFF_ROLES and account.employee_id is not None:
             raise HTTPException(401, 'Профиль учётной записи недоступен')
         return public_account(account)
-    if allow_demo:
+    if allow_demo and session.role in {'employee', 'hr'}:
         return {'role': session.role, 'employee_id': session.employee_id}
     raise HTTPException(401, 'Войдите в приложение')
 
@@ -155,8 +173,10 @@ def issue_session(db, account, request, response, settings):
 
 def create_first_hr(db, body, password_hash):
     """Caller holds BEGIN IMMEDIATE; shared by loopback setup and terminal CLI."""
-    if db.scalar(select(UserAccount.id).limit(1)) is not None:
+    if db.scalar(select(UserAccount.id).where(UserAccount.role != 'client').limit(1)) is not None:
         raise HTTPException(409, 'Первичная настройка уже выполнена. Войдите в существующую учётную запись')
+    if db.scalar(select(UserAccount.id).where(UserAccount.username == body.username)) is not None:
+        raise HTTPException(409, 'Имя пользователя уже занято')
     account = UserAccount(id=secrets.token_hex(16), username=body.username, display_name=body.display_name,
                           password_hash=password_hash, role='hr', employee_id=None, created_at=time.time())
     db.add(account)
@@ -170,7 +190,7 @@ def install_auth_routes(app, settings, hr_dependency):
     @app.get(f'{api}/auth/status')
     def status():
         with app.state.sessions() as db:
-            setup_required = db.scalar(select(UserAccount.id).limit(1)) is None
+            setup_required = db.scalar(select(UserAccount.id).where(UserAccount.role != 'client').limit(1)) is None
         return {'setup_required': setup_required, 'registration': 'invite', 'demo_enabled': settings.demo_mode}
 
     @app.post(f'{api}/auth/setup')
@@ -215,26 +235,29 @@ def install_auth_routes(app, settings, hr_dependency):
         password_hash = hash_password(body.password.get_secret_value())
         with app.state.sessions() as db:
             db.connection().exec_driver_sql('BEGIN IMMEDIATE')
-            invitation = db.get(Invitation, digest(body.invite_code))
             now = time.time()
-            if not invitation or invitation.used_at is not None or invitation.expires_at <= now:
-                raise HTTPException(422, 'Приглашение недействительно, уже использовано или истекло')
-            if invitation.role != body.role:
-                raise HTTPException(403, 'Выбранная роль не соответствует приглашению')
+            invitation = None
+            if body.role != 'client':
+                invitation = db.get(Invitation, digest(body.invite_code))
+                if not invitation or invitation.used_at is not None or invitation.expires_at <= now:
+                    raise HTTPException(422, 'Приглашение недействительно, уже использовано или истекло')
+                if invitation.role != body.role:
+                    raise HTTPException(403, 'Выбранная роль не соответствует приглашению')
             if db.scalar(select(UserAccount.id).where(UserAccount.username == body.username)):
                 raise HTTPException(409, 'Имя пользователя уже занято')
-            employee = db.get(Employee, invitation.employee_id) if invitation.employee_id else None
-            if invitation.role == 'employee':
+            employee = db.get(Employee, invitation.employee_id) if invitation and invitation.employee_id else None
+            if body.role in STAFF_ROLES:
                 if employee is None:
                     raise HTTPException(422, 'Профиль из приглашения недоступен')
                 if db.scalar(select(UserAccount.id).where(UserAccount.employee_id == employee.id)):
                     raise HTTPException(409, 'Для этого сотрудника уже создана учётная запись')
             account = UserAccount(id=secrets.token_hex(16), username=body.username,
-                                  display_name=employee.profile['name'] if employee else body.username,
-                                  password_hash=password_hash, role=invitation.role,
-                                  employee_id=invitation.employee_id, created_at=now)
+                                  display_name=employee.profile['name'] if employee else body.display_name if body.role == 'client' else body.username,
+                                  password_hash=password_hash, role=body.role,
+                                  employee_id=invitation.employee_id if invitation else None, created_at=now)
             db.add(account)
-            invitation.used_at = now
+            if invitation:
+                invitation.used_at = now
             db.flush()
             result = issue_session(db, account, request, response, settings)
             db.commit()

@@ -194,11 +194,14 @@ ERROR_MESSAGES = {
     'Первичная настройка доступна только на компьютере сервера': ('Initial setup is only available on the server computer', 'Бастапқы баптау тек сервер компьютерінде қолжетімді'),
     'Приглашение недействительно, уже использовано или истекло': ('The invitation is invalid, already used or expired', 'Шақыру жарамсыз, қолданылған немесе мерзімі өткен'),
     'Выбранная роль не соответствует приглашению': ('The selected role does not match the invitation', 'Таңдалған рөл шақыруға сәйкес келмейді'),
+    'Клиент регистрируется без приглашения сотрудника': ('Clients register without an employee invitation', 'Клиент қызметкер шақыруынсыз тіркеледі'),
+    'Для внутренней учётной записи требуется приглашение HR': ('An HR invitation is required for an internal account', 'Ішкі есептік жазба үшін HR шақыруы қажет'),
     'Имя пользователя уже занято': ('This username is already taken', 'Бұл пайдаланушы аты бос емес'),
     'Профиль из приглашения недоступен': ('The invited employee profile is unavailable', 'Шақырудағы қызметкер профилі қолжетімсіз'),
     'Для этого сотрудника уже создана учётная запись': ('This employee already has an account', 'Бұл қызметкердің есептік жазбасы бар'),
     'Сотрудник не найден': ('Employee not found', 'Қызметкер табылмады'),
     'Доступ разрешён только HR': ('Only HR can access this resource', 'Бұл ресурс тек HR үшін қолжетімді'),
+    'Доступ разрешён только руководителю команды': ('Only team leaders can access this resource', 'Бұл ресурс тек команда басшылары үшін қолжетімді'),
     'Нет доступа к этому профилю': ('You do not have access to this profile', 'Бұл профильге қолжетімділік жоқ'),
     'База данных временно недоступна. Повторите запрос.': ('The database is temporarily unavailable. Try again.', 'Деректер базасы уақытша қолжетімсіз. Қайталап көріңіз.'),
     'Требуется заголовок X-Requested-With: CareerQuest': ('The X-Requested-With: CareerQuest header is required', 'X-Requested-With: CareerQuest тақырыбы қажет'),
@@ -227,6 +230,8 @@ VALIDATION_MESSAGES = {
     'Input should be a valid string': ('Ожидается строка', 'Мәтіндік жол қажет'),
     'Input should be a valid integer': ('Ожидается целое число', 'Бүтін сан қажет'),
     "Input should be 'employee' or 'hr'": ('Ожидается роль employee или hr', 'employee немесе hr рөлі қажет'),
+    "Input should be 'employee', 'hr', 'manager', 'operator', 'supervisor' or 'client'": ('Ожидается роль employee, hr, manager, operator, supervisor или client', 'employee, hr, manager, operator, supervisor немесе client рөлдерінің бірі қажет'),
+    "Input should be 'employee', 'hr', 'manager', 'operator' or 'supervisor'": ('Ожидается внутренняя роль employee, hr, manager, operator или supervisor', 'employee, hr, manager, operator немесе supervisor ішкі рөлдерінің бірі қажет'),
 }
 
 

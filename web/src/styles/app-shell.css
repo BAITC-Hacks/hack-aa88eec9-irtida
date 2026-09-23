@@ -34,6 +34,23 @@
 .profile-tabs { display: flex; flex-wrap: wrap; gap: 5px; border-bottom: 1px solid #dfe7db; padding-bottom: 8px; }
 .profile-tabs button { border: 0; border-radius: 9px; background: transparent; color: #52634e; padding: 9px 14px; font-size: 12px; cursor: pointer; }
 .profile-tabs button.active { background: #e8f1df; color: #28543d; font-weight: 700; }
+.sidebar nav a { display: flex; gap: 13px; align-items: center; padding: 13px 15px; border-radius: 9px; color: #6c7e73; font-size: 13px; text-align: left; min-height: 46px; text-decoration: none; }
+.sidebar nav a .icon { width: 19px; height: 19px; }
+.sidebar nav a:hover { background: #f4f7f1; }
+.sidebar nav a.active { color: #2c6248; background: #edf4e8; font-weight: 650; }
+.sidebar nav a.active::before { content: ''; position: absolute; left: 0; width: 3px; height: 25px; border-radius: 0 3px 3px 0; background: #679756; }
+.app-shell a[aria-disabled="true"] { opacity: .6; cursor: wait; }
+.breadcrumb a { color: inherit; font-size: 12px; text-decoration: none; }
+.breadcrumb a:hover, .hr-profile-toolbar a:hover { text-decoration: underline; }
+.breadcrumb a[aria-current="page"] { font-weight: 700; color: #405749; }
+.account-trigger, .hr-profile-toolbar a { color: inherit; text-decoration: none; }
+.profile-tabs a { display: inline-block; border-radius: 9px; color: #52634e; padding: 9px 14px; font-size: 12px; text-decoration: none; }
+.profile-tabs a:hover { background: #f4f7f1; }
+.profile-tabs a.active { background: #e8f1df; color: #28543d; font-weight: 700; }
+.hero-next-step { margin-top: 22px; padding: 16px; border: 1px solid #5e795a; border-radius: 12px; background: #ffffff08; color: #eff9e9; }
+.hero-next-step strong { font-size: 14px; line-height: 1.5; }
+.hero-next-step p { margin: 9px 0; font-size: 13px; color: #dcebd3; }
+.hero-next-step small { display: block; font-size: 11px; line-height: 1.5; color: #c2d7b5; }
 .account-panel { max-width: 790px; display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; }
 .account-avatar { width: 70px; height: 70px; font-size: 23px; }
 .account-panel h2 { margin: 0 0 10px; }
@@ -92,5 +109,5 @@
     .account-details > div { grid-template-columns: 1fr; gap: 5px; }
     .account-panel { gap: 15px; }
     .invitation-form label, .invitation-form label:nth-child(2) { min-width: 0; width: 100%; flex: 1 1 100%; }
-    .profile-tabs button { padding: 8px 10px; }
+    .profile-tabs button, .profile-tabs a { padding: 8px 10px; }
 }

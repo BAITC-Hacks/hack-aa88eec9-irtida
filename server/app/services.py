@@ -34,15 +34,21 @@ def employee_view(db, employee_id):
     return {'employee': employee, 'skill_catalog': skills, 'trajectory': plan['trajectory'], 'history': [{**h, 'title': names.get(h['event_id'], h['event_id'])} for h in history], 'available': plan['available'], 'recommendation': None}
 
 
-def hr_overview(db):
+def hr_overview(db, employee_ids=None):
     catalog_row = db.get(Catalog, 1)
     catalog = catalog_row.payload if catalog_row else {'skills': [], 'events': [], 'grade_rules': []}
     gaps, no_step, participation = {}, [], {}
-    employees = list(db.scalars(select(Employee).order_by(Employee.id)))
+    employee_query = select(Employee).order_by(Employee.id)
+    history_query = select(Activity)
+    if employee_ids is not None:
+        # An explicitly empty team is an empty scope, never the whole company.
+        employee_query = employee_query.where(Employee.id.in_(employee_ids))
+        history_query = history_query.where(Activity.employee_id.in_(employee_ids))
+    employees = list(db.scalars(employee_query))
     history_by_employee = defaultdict(list)
     # A full dataset takes three SELECTs, not one history query per employee.
     status_counts = {'completed': 0, 'missed': 0, 'declined': 0, 'no_show': 0, 'dropped': 0, 'in_progress': 0, 'overdue': 0}
-    for item in db.scalars(select(Activity)):
+    for item in db.scalars(history_query):
         history_by_employee[item.employee_id].append({'id': item.id, 'event_id': item.event_id, 'status': item.status, 'occurred_at': item.occurred_at})
         counts = participation.setdefault(item.event_id, dict(status_counts))
         counts[item.status] += 1
@@ -64,4 +70,4 @@ def hr_overview(db):
             no_step.append({'id': employee.id, 'name': profile['name'], **plan['no_step']})
     for row in gaps.values():
         row['percent'] = round(100 * row['affected'] / row['eligible']) if row['eligible'] else None
-    return {'employee_count': len(employees), 'gaps': sorted(gaps.values(), key=lambda x: (-x['affected'], x['id'])), 'no_step': no_step, 'participation': [{'id': e['id'], 'title': e['title'], **participation.get(e['id'], status_counts)} for e in sorted(catalog['events'], key=lambda item: item['id'])]}
+    return {'employee_count': len(employees), 'gaps': sorted(gaps.values(), key=lambda x: (-x['affected'], x['id'])), 'no_step': no_step, 'participation': [{'id': e['id'], 'title': e['title'], **participation.get(e['id'], status_counts)} for e in sorted(catalog['events'], key=lambda item: item['id']) if employee_ids is None or e['id'] in participation]}
