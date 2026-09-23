@@ -1,0 +1,722 @@
+[
+  {
+    "skill_id": "SK_BE_PYTHON",
+    "name": "Python",
+    "category": "hard",
+    "role_family": "Backend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_BE_SYSDESIGN",
+    "name": "System Design",
+    "category": "hard",
+    "role_family": "Backend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_BE_DB",
+    "name": "Databases",
+    "category": "hard",
+    "role_family": "Backend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_BE_API",
+    "name": "API Design",
+    "category": "hard",
+    "role_family": "Backend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_BE_TEST",
+    "name": "Backend Testing",
+    "category": "hard",
+    "role_family": "Backend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_BE_CLOUD",
+    "name": "Cloud Infrastructure",
+    "category": "hard",
+    "role_family": "Backend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_BE_MSA",
+    "name": "Microservices",
+    "category": "hard",
+    "role_family": "Backend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_BE_SEC",
+    "name": "Security Basics",
+    "category": "hard",
+    "role_family": "Backend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_FE_JS",
+    "name": "JavaScript",
+    "category": "hard",
+    "role_family": "Frontend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_FE_REACT",
+    "name": "React",
+    "category": "hard",
+    "role_family": "Frontend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_FE_CSS",
+    "name": "CSS/UI Layout",
+    "category": "hard",
+    "role_family": "Frontend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_FE_PERF",
+    "name": "Web Performance",
+    "category": "hard",
+    "role_family": "Frontend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_FE_A11Y",
+    "name": "Accessibility",
+    "category": "hard",
+    "role_family": "Frontend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_FE_STATE",
+    "name": "State Management",
+    "category": "hard",
+    "role_family": "Frontend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_FE_TEST",
+    "name": "Frontend Testing",
+    "category": "hard",
+    "role_family": "Frontend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_FE_TOOLS",
+    "name": "Browser DevTools",
+    "category": "hard",
+    "role_family": "Frontend Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DA_SQL",
+    "name": "SQL",
+    "category": "hard",
+    "role_family": "Data Analyst",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DA_VIZ",
+    "name": "Data Visualization",
+    "category": "hard",
+    "role_family": "Data Analyst",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DA_STAT",
+    "name": "Statistics",
+    "category": "hard",
+    "role_family": "Data Analyst",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DA_PY",
+    "name": "Python for Data",
+    "category": "hard",
+    "role_family": "Data Analyst",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DA_ETL",
+    "name": "ETL Pipelines",
+    "category": "hard",
+    "role_family": "Data Analyst",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DA_ABT",
+    "name": "A/B Testing",
+    "category": "hard",
+    "role_family": "Data Analyst",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DA_BI",
+    "name": "Business Intelligence",
+    "category": "hard",
+    "role_family": "Data Analyst",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DA_MODEL",
+    "name": "Data Modeling",
+    "category": "hard",
+    "role_family": "Data Analyst",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_QA_AUTO",
+    "name": "Test Automation",
+    "category": "hard",
+    "role_family": "QA Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_QA_MANUAL",
+    "name": "Manual Testing",
+    "category": "hard",
+    "role_family": "QA Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_QA_PLAN",
+    "name": "Test Planning",
+    "category": "hard",
+    "role_family": "QA Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_QA_BUG",
+    "name": "Bug Tracking",
+    "category": "hard",
+    "role_family": "QA Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_QA_CI",
+    "name": "CI/CD for QA",
+    "category": "hard",
+    "role_family": "QA Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_QA_API",
+    "name": "API Testing",
+    "category": "hard",
+    "role_family": "QA Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_QA_PERF",
+    "name": "Performance Testing",
+    "category": "hard",
+    "role_family": "QA Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_QA_DOC",
+    "name": "Test Documentation",
+    "category": "hard",
+    "role_family": "QA Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DO_CI",
+    "name": "CI/CD Pipelines",
+    "category": "hard",
+    "role_family": "DevOps Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DO_CLOUD",
+    "name": "Cloud Platforms",
+    "category": "hard",
+    "role_family": "DevOps Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DO_CONT",
+    "name": "Containerization",
+    "category": "hard",
+    "role_family": "DevOps Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DO_MON",
+    "name": "Monitoring & Alerting",
+    "category": "hard",
+    "role_family": "DevOps Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DO_IAC",
+    "name": "Infrastructure as Code",
+    "category": "hard",
+    "role_family": "DevOps Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DO_NET",
+    "name": "Networking",
+    "category": "hard",
+    "role_family": "DevOps Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DO_SEC",
+    "name": "Security Operations",
+    "category": "hard",
+    "role_family": "DevOps Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_DO_AUTO",
+    "name": "Automation Scripting",
+    "category": "hard",
+    "role_family": "DevOps Engineer",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_PM_STRAT",
+    "name": "Product Strategy",
+    "category": "hard",
+    "role_family": "Product Manager",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_PM_ROAD",
+    "name": "Roadmapping",
+    "category": "hard",
+    "role_family": "Product Manager",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_PM_STAKE",
+    "name": "Stakeholder Management",
+    "category": "hard",
+    "role_family": "Product Manager",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_PM_MARKET",
+    "name": "Market Research",
+    "category": "hard",
+    "role_family": "Product Manager",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_PM_AGILE",
+    "name": "Agile Methodology",
+    "category": "hard",
+    "role_family": "Product Manager",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_PM_PRIOR",
+    "name": "Prioritization",
+    "category": "hard",
+    "role_family": "Product Manager",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_PM_DATA",
+    "name": "Data-Driven Decisions",
+    "category": "hard",
+    "role_family": "Product Manager",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_PM_UX",
+    "name": "User Research",
+    "category": "hard",
+    "role_family": "Product Manager",
+    "grade_requirements": {
+      "Junior": 1,
+      "Middle": 2,
+      "Senior": 4,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_PUBLIC",
+    "name": "Public Speaking",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 2,
+      "Senior": 3,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_LEAD",
+    "name": "Leadership",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 2,
+      "Senior": 3,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_TEAM",
+    "name": "Teamwork",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 1,
+      "Senior": 2,
+      "Lead": 3
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_COMM",
+    "name": "Communication",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 1,
+      "Senior": 2,
+      "Lead": 3
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_TIME",
+    "name": "Time Management",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 1,
+      "Senior": 2,
+      "Lead": 3
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_NEGO",
+    "name": "Negotiation",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 1,
+      "Senior": 2,
+      "Lead": 3
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_CRIT",
+    "name": "Critical Thinking",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 1,
+      "Senior": 2,
+      "Lead": 3
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_ADAPT",
+    "name": "Adaptability",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 1,
+      "Senior": 2,
+      "Lead": 3
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_MENTOR",
+    "name": "Mentoring",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 2,
+      "Senior": 3,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_CONFLICT",
+    "name": "Conflict Resolution",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 2,
+      "Senior": 3,
+      "Lead": 5
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_EQ",
+    "name": "Emotional Intelligence",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 1,
+      "Senior": 2,
+      "Lead": 3
+    }
+  },
+  {
+    "skill_id": "SK_SOFT_STRAT",
+    "name": "Strategic Thinking",
+    "category": "soft",
+    "role_family": null,
+    "grade_requirements": {
+      "Junior": 0,
+      "Middle": 2,
+      "Senior": 3,
+      "Lead": 5
+    }
+  }
+]

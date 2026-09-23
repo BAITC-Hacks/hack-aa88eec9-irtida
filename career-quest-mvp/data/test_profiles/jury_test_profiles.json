@@ -1,0 +1,109 @@
+{
+  "_comment": "Проверочные профили жюри. Однофакторное правило 'бери самый низкий навык' ошибается на каждом: сотрудник избегает активностей по своему самому низкому soft-навыку, а критичным для перехода на следующий грейд является другой (hard) навык. Загружаются через POST /api/import отдельно от основного датасета.",
+  "employees": [
+    {
+      "employee_id": "E9001",
+      "name": "Test Profile 1 (Backend)",
+      "role": "Backend Engineer",
+      "grade": "Middle",
+      "tenure_months": 40,
+      "skills": {
+        "SK_BE_PYTHON": 3,
+        "SK_BE_SYSDESIGN": 2,
+        "SK_BE_DB": 3,
+        "SK_BE_API": 3,
+        "SK_BE_TEST": 3,
+        "SK_BE_CLOUD": 3,
+        "SK_BE_MSA": 3,
+        "SK_BE_SEC": 3,
+        "SK_SOFT_PUBLIC": 0,
+        "SK_SOFT_LEAD": 2,
+        "SK_SOFT_TEAM": 3,
+        "SK_SOFT_COMM": 2,
+        "SK_SOFT_TIME": 2,
+        "SK_SOFT_NEGO": 2,
+        "SK_SOFT_CRIT": 2,
+        "SK_SOFT_ADAPT": 2,
+        "SK_SOFT_MENTOR": 2,
+        "SK_SOFT_CONFLICT": 2,
+        "SK_SOFT_EQ": 2,
+        "SK_SOFT_STRAT": 1
+      }
+    },
+    {
+      "employee_id": "E9002",
+      "name": "Test Profile 2 (Frontend)",
+      "role": "Frontend Engineer",
+      "grade": "Middle",
+      "tenure_months": 38,
+      "skills": {
+        "SK_FE_JS": 3,
+        "SK_FE_REACT": 3,
+        "SK_FE_CSS": 3,
+        "SK_FE_PERF": 3,
+        "SK_FE_A11Y": 1,
+        "SK_FE_STATE": 3,
+        "SK_FE_TEST": 3,
+        "SK_FE_TOOLS": 3,
+        "SK_SOFT_EQ": 0,
+        "SK_SOFT_LEAD": 2,
+        "SK_SOFT_TEAM": 3,
+        "SK_SOFT_COMM": 2,
+        "SK_SOFT_TIME": 2,
+        "SK_SOFT_NEGO": 2,
+        "SK_SOFT_CRIT": 2,
+        "SK_SOFT_ADAPT": 2,
+        "SK_SOFT_MENTOR": 2,
+        "SK_SOFT_CONFLICT": 2,
+        "SK_SOFT_PUBLIC": 2,
+        "SK_SOFT_STRAT": 1
+      }
+    },
+    {
+      "employee_id": "E9003",
+      "name": "Test Profile 3 (Data Analyst)",
+      "role": "Data Analyst",
+      "grade": "Middle",
+      "tenure_months": 41,
+      "skills": {
+        "SK_DA_SQL": 3,
+        "SK_DA_VIZ": 3,
+        "SK_DA_STAT": 2,
+        "SK_DA_PY": 3,
+        "SK_DA_ETL": 3,
+        "SK_DA_ABT": 3,
+        "SK_DA_BI": 3,
+        "SK_DA_MODEL": 3,
+        "SK_SOFT_NEGO": 0,
+        "SK_SOFT_LEAD": 2,
+        "SK_SOFT_TEAM": 3,
+        "SK_SOFT_COMM": 2,
+        "SK_SOFT_TIME": 2,
+        "SK_SOFT_CRIT": 2,
+        "SK_SOFT_ADAPT": 2,
+        "SK_SOFT_MENTOR": 2,
+        "SK_SOFT_CONFLICT": 2,
+        "SK_SOFT_EQ": 2,
+        "SK_SOFT_PUBLIC": 2,
+        "SK_SOFT_STRAT": 1
+      }
+    }
+  ],
+  "history": [
+    {"employee_id": "E9001", "event_id": "EV035", "month": 5, "status": "skipped"},
+    {"employee_id": "E9001", "event_id": "EV035", "month": 11, "status": "declined"},
+    {"employee_id": "E9001", "event_id": "EV032", "month": 17, "status": "skipped"},
+    {"employee_id": "E9001", "event_id": "EV002", "month": 8, "status": "completed"},
+    {"employee_id": "E9001", "event_id": "EV004", "month": 20, "status": "completed"},
+
+    {"employee_id": "E9002", "event_id": "EV031", "month": 4, "status": "skipped"},
+    {"employee_id": "E9002", "event_id": "EV034", "month": 10, "status": "declined"},
+    {"employee_id": "E9002", "event_id": "EV034", "month": 16, "status": "skipped"},
+    {"employee_id": "E9002", "event_id": "EV006", "month": 7, "status": "completed"},
+
+    {"employee_id": "E9003", "event_id": "EV040", "month": 6, "status": "skipped"},
+    {"employee_id": "E9003", "event_id": "EV037", "month": 12, "status": "declined"},
+    {"employee_id": "E9003", "event_id": "EV040", "month": 19, "status": "skipped"},
+    {"employee_id": "E9003", "event_id": "EV002", "month": 9, "status": "completed"}
+  ]
+}

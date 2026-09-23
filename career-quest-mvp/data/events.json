@@ -1,0 +1,682 @@
+[
+  {
+    "event_id": "EV001",
+    "name": "Backend Engineer: Training #1",
+    "type": "training",
+    "audience": "Backend Engineer",
+    "description": "Training программа для роли Backend Engineer, развивает System Design, Python.",
+    "skills_developed": {
+      "SK_BE_SYSDESIGN": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_BE_PYTHON": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV002",
+    "name": "Backend Engineer: Mentoring #2",
+    "type": "mentoring",
+    "audience": "Backend Engineer",
+    "description": "Mentoring программа для роли Backend Engineer, развивает API Design, System Design.",
+    "skills_developed": {
+      "SK_BE_API": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_BE_SYSDESIGN": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV003",
+    "name": "Backend Engineer: Rotation #3",
+    "type": "rotation",
+    "audience": "Backend Engineer",
+    "description": "Rotation программа для роли Backend Engineer, развивает System Design, Cloud Infrastructure.",
+    "skills_developed": {
+      "SK_BE_SYSDESIGN": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_BE_CLOUD": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV004",
+    "name": "Backend Engineer: Assessment #4",
+    "type": "assessment",
+    "audience": "Backend Engineer",
+    "description": "Assessment программа для роли Backend Engineer, развивает System Design, Backend Testing.",
+    "skills_developed": {
+      "SK_BE_SYSDESIGN": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_BE_TEST": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV005",
+    "name": "Backend Engineer: Workshop #5",
+    "type": "workshop",
+    "audience": "Backend Engineer",
+    "description": "Workshop программа для роли Backend Engineer, развивает Python, Security Basics.",
+    "skills_developed": {
+      "SK_BE_PYTHON": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_BE_SEC": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV006",
+    "name": "Frontend Engineer: Training #1",
+    "type": "training",
+    "audience": "Frontend Engineer",
+    "description": "Training программа для роли Frontend Engineer, развивает JavaScript, Accessibility.",
+    "skills_developed": {
+      "SK_FE_JS": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_FE_A11Y": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV007",
+    "name": "Frontend Engineer: Mentoring #2",
+    "type": "mentoring",
+    "audience": "Frontend Engineer",
+    "description": "Mentoring программа для роли Frontend Engineer, развивает Frontend Testing, React.",
+    "skills_developed": {
+      "SK_FE_TEST": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_FE_REACT": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV008",
+    "name": "Frontend Engineer: Rotation #3",
+    "type": "rotation",
+    "audience": "Frontend Engineer",
+    "description": "Rotation программа для роли Frontend Engineer, развивает Accessibility, Frontend Testing.",
+    "skills_developed": {
+      "SK_FE_A11Y": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_FE_TEST": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV009",
+    "name": "Frontend Engineer: Assessment #4",
+    "type": "assessment",
+    "audience": "Frontend Engineer",
+    "description": "Assessment программа для роли Frontend Engineer, развивает Frontend Testing, CSS/UI Layout.",
+    "skills_developed": {
+      "SK_FE_TEST": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_FE_CSS": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV010",
+    "name": "Frontend Engineer: Workshop #5",
+    "type": "workshop",
+    "audience": "Frontend Engineer",
+    "description": "Workshop программа для роли Frontend Engineer, развивает Web Performance, Frontend Testing.",
+    "skills_developed": {
+      "SK_FE_PERF": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_FE_TEST": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV011",
+    "name": "Data Analyst: Training #1",
+    "type": "training",
+    "audience": "Data Analyst",
+    "description": "Training программа для роли Data Analyst, развивает Data Visualization, Python for Data.",
+    "skills_developed": {
+      "SK_DA_VIZ": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_DA_PY": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV012",
+    "name": "Data Analyst: Mentoring #2",
+    "type": "mentoring",
+    "audience": "Data Analyst",
+    "description": "Mentoring программа для роли Data Analyst, развивает A/B Testing, ETL Pipelines.",
+    "skills_developed": {
+      "SK_DA_ABT": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_DA_ETL": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV013",
+    "name": "Data Analyst: Rotation #3",
+    "type": "rotation",
+    "audience": "Data Analyst",
+    "description": "Rotation программа для роли Data Analyst, развивает Data Modeling, ETL Pipelines.",
+    "skills_developed": {
+      "SK_DA_MODEL": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_DA_ETL": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV014",
+    "name": "Data Analyst: Assessment #4",
+    "type": "assessment",
+    "audience": "Data Analyst",
+    "description": "Assessment программа для роли Data Analyst, развивает Data Visualization, ETL Pipelines.",
+    "skills_developed": {
+      "SK_DA_VIZ": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_DA_ETL": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV015",
+    "name": "Data Analyst: Workshop #5",
+    "type": "workshop",
+    "audience": "Data Analyst",
+    "description": "Workshop программа для роли Data Analyst, развивает A/B Testing, ETL Pipelines.",
+    "skills_developed": {
+      "SK_DA_ABT": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_DA_ETL": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV016",
+    "name": "QA Engineer: Training #1",
+    "type": "training",
+    "audience": "QA Engineer",
+    "description": "Training программа для роли QA Engineer, развивает Manual Testing, Test Automation.",
+    "skills_developed": {
+      "SK_QA_MANUAL": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_QA_AUTO": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV017",
+    "name": "QA Engineer: Mentoring #2",
+    "type": "mentoring",
+    "audience": "QA Engineer",
+    "description": "Mentoring программа для роли QA Engineer, развивает CI/CD for QA, Test Automation.",
+    "skills_developed": {
+      "SK_QA_CI": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_QA_AUTO": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV018",
+    "name": "QA Engineer: Rotation #3",
+    "type": "rotation",
+    "audience": "QA Engineer",
+    "description": "Rotation программа для роли QA Engineer, развивает Performance Testing, Test Planning.",
+    "skills_developed": {
+      "SK_QA_PERF": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_QA_PLAN": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV019",
+    "name": "QA Engineer: Assessment #4",
+    "type": "assessment",
+    "audience": "QA Engineer",
+    "description": "Assessment программа для роли QA Engineer, развивает API Testing, Manual Testing.",
+    "skills_developed": {
+      "SK_QA_API": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_QA_MANUAL": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV020",
+    "name": "QA Engineer: Workshop #5",
+    "type": "workshop",
+    "audience": "QA Engineer",
+    "description": "Workshop программа для роли QA Engineer, развивает Bug Tracking, API Testing.",
+    "skills_developed": {
+      "SK_QA_BUG": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_QA_API": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV021",
+    "name": "DevOps Engineer: Training #1",
+    "type": "training",
+    "audience": "DevOps Engineer",
+    "description": "Training программа для роли DevOps Engineer, развивает Cloud Platforms, Infrastructure as Code.",
+    "skills_developed": {
+      "SK_DO_CLOUD": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_DO_IAC": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV022",
+    "name": "DevOps Engineer: Mentoring #2",
+    "type": "mentoring",
+    "audience": "DevOps Engineer",
+    "description": "Mentoring программа для роли DevOps Engineer, развивает Monitoring & Alerting, Cloud Platforms.",
+    "skills_developed": {
+      "SK_DO_MON": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_DO_CLOUD": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV023",
+    "name": "DevOps Engineer: Rotation #3",
+    "type": "rotation",
+    "audience": "DevOps Engineer",
+    "description": "Rotation программа для роли DevOps Engineer, развивает Infrastructure as Code, Networking.",
+    "skills_developed": {
+      "SK_DO_IAC": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_DO_NET": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV024",
+    "name": "DevOps Engineer: Assessment #4",
+    "type": "assessment",
+    "audience": "DevOps Engineer",
+    "description": "Assessment программа для роли DevOps Engineer, развивает Monitoring & Alerting, Networking.",
+    "skills_developed": {
+      "SK_DO_MON": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_DO_NET": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV025",
+    "name": "DevOps Engineer: Workshop #5",
+    "type": "workshop",
+    "audience": "DevOps Engineer",
+    "description": "Workshop программа для роли DevOps Engineer, развивает Monitoring & Alerting, Security Operations.",
+    "skills_developed": {
+      "SK_DO_MON": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_DO_SEC": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV026",
+    "name": "Product Manager: Training #1",
+    "type": "training",
+    "audience": "Product Manager",
+    "description": "Training программа для роли Product Manager, развивает Data-Driven Decisions, Stakeholder Management.",
+    "skills_developed": {
+      "SK_PM_DATA": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_PM_STAKE": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV027",
+    "name": "Product Manager: Mentoring #2",
+    "type": "mentoring",
+    "audience": "Product Manager",
+    "description": "Mentoring программа для роли Product Manager, развивает Prioritization, Roadmapping.",
+    "skills_developed": {
+      "SK_PM_PRIOR": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_PM_ROAD": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV028",
+    "name": "Product Manager: Rotation #3",
+    "type": "rotation",
+    "audience": "Product Manager",
+    "description": "Rotation программа для роли Product Manager, развивает Data-Driven Decisions, Prioritization.",
+    "skills_developed": {
+      "SK_PM_DATA": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_PM_PRIOR": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV029",
+    "name": "Product Manager: Assessment #4",
+    "type": "assessment",
+    "audience": "Product Manager",
+    "description": "Assessment программа для роли Product Manager, развивает Agile Methodology, Roadmapping.",
+    "skills_developed": {
+      "SK_PM_AGILE": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_PM_ROAD": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV030",
+    "name": "Product Manager: Workshop #5",
+    "type": "workshop",
+    "audience": "Product Manager",
+    "description": "Workshop программа для роли Product Manager, развивает Agile Methodology, Prioritization.",
+    "skills_developed": {
+      "SK_PM_AGILE": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_PM_PRIOR": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV031",
+    "name": "All Roles: Leadership Training #1",
+    "type": "training",
+    "audience": "All",
+    "description": "Общая training программа по развитию Leadership / Emotional Intelligence.",
+    "skills_developed": {
+      "SK_SOFT_LEAD": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_SOFT_EQ": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV032",
+    "name": "All Roles: Adaptability Mentoring #2",
+    "type": "mentoring",
+    "audience": "All",
+    "description": "Общая mentoring программа по развитию Adaptability / Public Speaking.",
+    "skills_developed": {
+      "SK_SOFT_ADAPT": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_SOFT_PUBLIC": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV033",
+    "name": "All Roles: Strategic Thinking Rotation #3",
+    "type": "rotation",
+    "audience": "All",
+    "description": "Общая rotation программа по развитию Strategic Thinking / Mentoring.",
+    "skills_developed": {
+      "SK_SOFT_STRAT": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_SOFT_MENTOR": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV034",
+    "name": "All Roles: Emotional Intelligence Assessment #4",
+    "type": "assessment",
+    "audience": "All",
+    "description": "Общая assessment программа по развитию Emotional Intelligence / Time Management.",
+    "skills_developed": {
+      "SK_SOFT_EQ": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_SOFT_TIME": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV035",
+    "name": "All Roles: Public Speaking Workshop #5",
+    "type": "workshop",
+    "audience": "All",
+    "description": "Общая workshop программа по развитию Public Speaking / Teamwork.",
+    "skills_developed": {
+      "SK_SOFT_PUBLIC": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_SOFT_TEAM": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV036",
+    "name": "All Roles: Mentoring Training #6",
+    "type": "training",
+    "audience": "All",
+    "description": "Общая training программа по развитию Mentoring / Communication.",
+    "skills_developed": {
+      "SK_SOFT_MENTOR": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_SOFT_COMM": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV037",
+    "name": "All Roles: Time Management Mentoring #7",
+    "type": "mentoring",
+    "audience": "All",
+    "description": "Общая mentoring программа по развитию Time Management / Negotiation.",
+    "skills_developed": {
+      "SK_SOFT_TIME": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_SOFT_NEGO": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV038",
+    "name": "All Roles: Teamwork Rotation #8",
+    "type": "rotation",
+    "audience": "All",
+    "description": "Общая rotation программа по развитию Teamwork / Critical Thinking.",
+    "skills_developed": {
+      "SK_SOFT_TEAM": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_SOFT_CRIT": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV039",
+    "name": "All Roles: Communication Assessment #9",
+    "type": "assessment",
+    "audience": "All",
+    "description": "Общая assessment программа по развитию Communication / Conflict Resolution.",
+    "skills_developed": {
+      "SK_SOFT_COMM": {
+        "gain": 1,
+        "max_level": 5
+      },
+      "SK_SOFT_CONFLICT": {
+        "gain": 2,
+        "max_level": 5
+      }
+    }
+  },
+  {
+    "event_id": "EV040",
+    "name": "All Roles: Negotiation Workshop #10",
+    "type": "workshop",
+    "audience": "All",
+    "description": "Общая workshop программа по развитию Negotiation / Leadership.",
+    "skills_developed": {
+      "SK_SOFT_NEGO": {
+        "gain": 2,
+        "max_level": 5
+      },
+      "SK_SOFT_LEAD": {
+        "gain": 1,
+        "max_level": 5
+      }
+    }
+  }
+]

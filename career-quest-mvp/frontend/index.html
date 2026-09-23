@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career Quest — мой профиль</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="dot"></span> Career Quest</div>
+  <nav class="tabs">
+    <a href="/" class="active">Сотрудник</a>
+    <a href="/hr">HR</a>
+  </nav>
+</header>
+
+<main>
+  <div class="card">
+    <div class="row">
+      <div class="grow">
+        <label class="hint">ID сотрудника (демо-вход)</label>
+        <div class="row">
+          <input id="empIdInput" placeholder="например, E0001" value="E0001" />
+          <button id="loadBtn">Открыть профиль</button>
+        </div>
+      </div>
+    </div>
+    <p class="hint">MVP-демо: реальная система использует SSO; здесь ID сотрудника подставляется вручную и передаётся как X-Employee-Id (роль employee — видит только себя).</p>
+  </div>
+
+  <div id="content"></div>
+
+  <p class="footer-note">Career Quest — HackAlem AI · Halyk Bank track</p>
+</main>
+
+<script src="app.js"></script>
+<script>
+  document.getElementById('loadBtn').addEventListener('click', () => {
+    const id = document.getElementById('empIdInput').value.trim();
+    if (id) loadEmployeeView(id);
+  });
+  document.getElementById('empIdInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('loadBtn').click();
+  });
+  loadEmployeeView(document.getElementById('empIdInput').value.trim());
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career Quest — HR</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="dot"></span> Career Quest</div>
+  <nav class="tabs">
+    <a href="/">Сотрудник</a>
+    <a href="/hr" class="active">HR</a>
+  </nav>
+</header>
+
+<main>
+  <div class="card" id="overviewCard">
+    <h2>Обзор</h2>
+    <div id="overviewBody" class="loading">Загрузка…</div>
+  </div>
+
+  <div class="card">
+    <h2>Загрузить проверочные профили (жюри)</h2>
+    <p class="hint">Загрузите JSON-файл в формате датасета ({"employees":[...], "history":[...]}) — например data/test_profiles/jury_test_profiles.json.</p>
+    <div class="row">
+      <input type="file" id="importFile" accept="application/json" />
+      <button id="importBtn">Импортировать</button>
+    </div>
+    <div id="importResult" class="hint"></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Проседающие компетенции</h2>
+      <div id="laggingBody" class="loading">Загрузка…</div>
+    </div>
+    <div class="card">
+      <h2>Сотрудники без следующего шага</h2>
+      <div id="noStepBody" class="loading">Загрузка…</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Участие по активностям</h2>
+    <div id="participationBody" class="loading">Загрузка…</div>
+  </div>
+
+  <p class="footer-note">Career Quest — HackAlem AI · Halyk Bank track</p>
+</main>
+
+<script src="app.js"></script>
+<script>loadHrView();</script>
+</body>
+</html>
