@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { useI18n } from '../i18n';
 export type IconName = 'route' | 'compass' | 'spark' | 'arrow' | 'check' | 'flag' | 'book' | 'award' | 'chart' | 'logout' | 'clock' | 'shield' | 'upload' | 'close' | 'users' | 'chevron' | 'refresh' | 'leaf';
 const paths: Record<IconName, string> = {
     route: 'M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm14-10a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM5 15V9a4 4 0 0 1 4-4h2m8 4v6a4 4 0 0 1-4 4h-2M9 5l2-2m0 2L9 7',
@@ -24,5 +25,6 @@ export function Icon({ name, className = '', style }: {
     return <svg className={`icon ${className}`} style={style} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name]}/></svg>;
 }
 export function Brand() {
-    return <span className="brand"><span className="brand-mark"><Icon name="route"/></span><span>career<span className="brand-light">quest</span><small>РАСТИ В СВОЁМ РИТМЕ</small></span></span>;
+    const { t } = useI18n();
+    return <span className="brand"><span className="brand-mark"><Icon name="route"/></span><span>career<span className="brand-light">quest</span><small>{t('РАСТИ В СВОЁМ РИТМЕ', 'GROW AT YOUR OWN PACE', 'ӨЗ ҚАРҚЫНЫҢМЕН ӨС')}</small></span></span>;
 }

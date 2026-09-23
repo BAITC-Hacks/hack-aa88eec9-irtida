@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawn, spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
 import { File } from 'node:buffer';
+import { randomBytes } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import ts from 'typescript';
 
@@ -24,8 +25,12 @@ assert.ok(existsSync(python), 'Create the repository .venv first, or set CQ_PYTH
 const buildRoot = join(web, '.test-build');
 mkdirSync(buildRoot, { recursive: true });
 const temporary = mkdtempSync(join(buildRoot, 'live-http-'));
-const database = join(temporary, 'integration.db');
+let database = join(temporary, 'integration.db');
+let realAccounts = false;
 const nativeFetch = globalThis.fetch;
+const originalWindow = globalThis.window;
+let language = 'ru';
+let responseLanguage;
 let server;
 let origin;
 let cookie = '';
@@ -50,7 +55,7 @@ async function start(provider = 'rules') {
   const launcher = "import sys,threading,uvicorn; server=uvicorn.Server(uvicorn.Config('app.main:app',host='127.0.0.1',port=int(sys.argv[1]),access_log=False,log_level='warning')); threading.Thread(target=lambda:(sys.stdin.read(),setattr(server,'should_exit',True)),daemon=True).start(); server.run()";
   server = spawn(python, ['-c', launcher, String(port)], {
     cwd: join(root, 'server'), windowsHide: true,
-    env: { ...process.env, DATABASE_URL: `sqlite:///${database.replaceAll('\\', '/')}`, AI_PROVIDER: provider, OPENAI_API_KEY: '', NVIDIA_API_KEY: '', DEMO_MODE: 'true', COOKIE_SECURE: 'false', AI_DATA_POLICY_APPROVED: provider === 'openai' ? 'true' : 'false', ALLOWED_ORIGINS: origin },
+    env: { ...process.env, DATABASE_URL: `sqlite:///${database.replaceAll('\\', '/')}`, AI_PROVIDER: provider, OPENAI_API_KEY: '', NVIDIA_API_KEY: '', DEMO_MODE: realAccounts ? 'false' : 'true', CAREER_QUEST_AUTO_IMPORT: realAccounts ? 'true' : 'false', CAREER_QUEST_KIT_DIR: resolve(kitDir), COOKIE_SECURE: 'false', AI_DATA_POLICY_APPROVED: provider === 'openai' ? 'true' : 'false', ALLOWED_ORIGINS: origin },
     stdio: ['pipe', 'pipe', 'pipe'],
   });
   server.on('error', error => { logs += String(error); });
@@ -114,19 +119,25 @@ function importShape(summary, dryRun, added) {
 }
 
 try {
-  const module = ts.transpileModule(readFileSync(join(web, 'src/api.ts'), 'utf8'), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } });
+  // Supply only the browser locale storage used by the real getLocale helper.
+  globalThis.window = { localStorage: { getItem: () => language } };
   const compiled = join(temporary, 'api.mjs');
-  writeFileSync(compiled, module.outputText);
-  const { api, ApiError, importKit, completeEvent } = await import(pathToFileURL(compiled).href);
+  for (const filename of ['api.ts', 'i18n.tsx']) {
+    const module = ts.transpileModule(readFileSync(join(web, 'src', filename), 'utf8'), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } });
+    writeFileSync(join(temporary, filename.replace(/\.tsx?$/, '.mjs')), module.outputText.replace(/(from\s+['"])(\.\.?\/[^'"]+)(['"])/g, '$1$2.mjs$3'));
+  }
+  const { api, ApiError, importKit, completeEvent, authenticate } = await import(pathToFileURL(compiled).href);
   // Node lacks the browser origin and cookie jar. Preserve the real API helper's
   // request body, credentials, CSRF header and errors while supplying only those.
   globalThis.fetch = async (input, options = {}) => {
     assert.equal(options.credentials, 'same-origin');
     const headers = new Headers(options.headers);
     assert.equal(headers.get('X-Requested-With'), 'CareerQuest');
+    assert.equal(headers.get('Accept-Language'), language);
     headers.set('Origin', origin);
     if (cookie) headers.set('Cookie', cookie);
     const response = await nativeFetch(new URL(input, origin), { ...options, headers });
+    responseLanguage = response.headers.get('Content-Language');
     for (const value of response.headers.getSetCookie()) if (value.startsWith('cq_session=')) cookie = value.split(';', 1)[0];
     return response;
   };
@@ -258,6 +269,106 @@ try {
   await api('/auth/logout', { method: 'POST' });
   await expectStatus(() => api('/auth/me'), 401);
 
+  // A separate database verifies the actual, non-demo launch and account flow.
+  // Bootstrap loads the local Kit once; no employee IDs or catalog data are copied.
+  await stop();
+  database = join(temporary, 'real-accounts.db');
+  realAccounts = true;
+  cookie = '';
+  await start();
+  const authStatus = capture('AuthStatus', await api('/auth/status'));
+  assert.deepEqual({ ...authStatus }, { setup_required: true, registration: 'invite', demo_enabled: false });
+  assert.deepEqual(await api('/auth/demo-accounts'), { enabled: false, accounts: [] });
+  await expectStatus(() => login('hr'), 403);
+  const hrCredentials = { username: 'http.integration.hr', password: randomBytes(24).toString('base64url'), role: 'hr', display_name: 'HTTP integration HR' };
+  const hrAccount = capture('Account', await authenticate('setup', hrCredentials));
+  assert.equal(hrAccount.role, 'hr');
+  assert.equal(hrAccount.employee_id, null);
+  assert.equal((await api('/auth/status')).setup_required, false);
+  await expectStatus(() => authenticate('setup', hrCredentials), 409);
+  const fullCatalog = capture('Catalog', await api('/catalog'));
+  assert.deepEqual(fullCatalog.counts, { skills: 60, events: 40, grade_rules: 24 });
+  assert.equal(fullCatalog.skills.length, 60);
+  assert.equal(fullCatalog.events.length, 40);
+  const realEmployees = await api('/employees');
+  assert.equal(realEmployees.length, 200);
+  let businessProfile;
+  for (const employee of realEmployees.filter(item => ['Sales Manager', 'Customer Support Specialist'].includes(item.role))) {
+    const profile = await getProfile(employee.id);
+    if (profile.available.length) { businessProfile = profile; break; }
+  }
+  assert.ok(businessProfile, 'A Sales or Customer Support employee must have a development step');
+  const businessId = businessProfile.employee.id;
+  const invite = capture('Invitation', await api('/hr/invitations', {
+    method: 'POST', body: JSON.stringify({ role: 'employee', employee_id: businessId }),
+  }));
+  assert.ok(invite.invite_code.length >= 32 && invite.expires_at > Date.now() / 1000);
+  const memberCredentials = { username: 'http.integration.member', password: randomBytes(24).toString('base64url'), role: 'employee', invite_code: invite.invite_code };
+  await expectStatus(() => authenticate('register', { ...memberCredentials, role: 'hr' }), 403);
+  const memberAccount = capture('Account', await authenticate('register', memberCredentials));
+  assert.equal(memberAccount.employee_id, businessId);
+  assert.equal(memberAccount.role, 'employee');
+  await expectStatus(() => authenticate('register', { ...memberCredentials, username: 'http.integration.replay' }), 422);
+  await expectStatus(() => authenticate('login', { ...memberCredentials, role: 'hr' }), 401);
+  for (const path of ['/hr/overview', '/hr/accounts', '/catalog', '/employees']) await expectStatus(() => api(path), 403);
+  await expectStatus(() => api(`/employees/${realEmployees.find(item => item.id !== businessId).id}`), 403);
+  await expectStatus(() => api('/hr/invitations', { method: 'POST', body: JSON.stringify({ role: 'hr', employee_id: null }) }), 403);
+
+  const numericCandidate = event => ({ id: event.id, occurrence_id: event.occurrence_id, projected_coverage: event.projected_coverage,
+    critical_benefit: event.critical_benefit, changes: Object.fromEntries(Object.entries(event.changes).map(([id, change]) => [id, { before: change.before, after: change.after, gain: change.gain }])) });
+  const numericProfile = profile => ({ id: profile.employee.id, role: profile.employee.role, grade: profile.employee.grade,
+    levels: profile.employee.skills, coverage: profile.trajectory.coverage, next_grade: profile.trajectory.next_grade,
+    critical_requirements_met: profile.trajectory.critical_requirements_met,
+    requirements: profile.trajectory.skills.map(skill => ({ id: skill.id, level: skill.level, required: skill.required, gap: skill.gap, critical: skill.critical })),
+    available: profile.available.map(numericCandidate),
+    history: profile.history.map(item => ({ id: item.id, event_id: item.event_id, status: item.status, occurred_at: item.occurred_at })) });
+  const localizedProfiles = [];
+  const localizedRecommendations = [];
+  for (const locale of ['ru', 'en', 'kk']) {
+    language = locale;
+    const profile = await getProfile(businessId);
+    assert.equal(responseLanguage, locale);
+    assert.equal(profile.skill_catalog.length, 60);
+    assert.equal(new Set(profile.skill_catalog.map(item => item.id)).size, 60);
+    for (const skill of profile.skill_catalog) assert.equal(skill.level, profile.employee.skills[skill.id]);
+    localizedProfiles.push(profile);
+    const recommended = capture('Recommendations', await api(`/employees/${businessId}/recommendations`, { method: 'POST' }));
+    assert.equal(responseLanguage, locale);
+    assert.equal(recommended.mode, 'rules');
+    localizedRecommendations.push(recommended);
+  }
+  for (const profile of localizedProfiles.slice(1)) assert.deepEqual(numericProfile(profile), numericProfile(localizedProfiles[0]));
+  for (const recommended of localizedRecommendations.slice(1)) assert.deepEqual(recommended.items.map(numericCandidate), localizedRecommendations[0].items.map(numericCandidate));
+  assert.notDeepEqual(localizedProfiles[0].skill_catalog.map(item => item.name), localizedProfiles[1].skill_catalog.map(item => item.name));
+  assert.notDeepEqual(localizedProfiles[1].skill_catalog.map(item => item.name), localizedProfiles[2].skill_catalog.map(item => item.name));
+  assert.notEqual(localizedRecommendations[0].items[0].evidence[2].text, localizedRecommendations[1].items[0].evidence[2].text);
+  assert.notEqual(localizedRecommendations[1].items[0].evidence[2].text, localizedRecommendations[2].items[0].evidence[2].text);
+  language = 'ru';
+  const businessBefore = await getProfile(businessId);
+  const selected = localizedRecommendations[0].items[0];
+  const businessDone = capture('CompletionResult', await completeEvent(businessId, selected));
+  assert.equal(businessDone.already_completed, false);
+  assert.equal(businessDone.profile.trajectory.coverage, selected.projected_coverage);
+  assert.equal(businessDone.profile.employee.grade, businessBefore.employee.grade);
+  assert.equal(businessDone.profile.history.length, businessBefore.history.length + 1);
+  for (const [id, level] of Object.entries(businessBefore.employee.skills)) assert.equal(businessDone.profile.employee.skills[id], selected.changes[id]?.after ?? level);
+  assert.equal((await completeEvent(businessId, selected)).already_completed, true);
+  await stop();
+  await start();
+  assert.equal((await api('/auth/me')).employee_id, businessId);
+  assert.deepEqual(numericProfile(await getProfile(businessId)), numericProfile(businessDone.profile));
+  await api('/auth/logout', { method: 'POST' });
+  await expectStatus(() => api('/auth/me'), 401);
+  capture('Account', await authenticate('login', memberCredentials));
+  assert.equal((await api('/auth/me')).employee_id, businessId);
+  await api('/auth/logout', { method: 'POST' });
+  capture('Account', await authenticate('login', hrCredentials));
+  const registered = capture('RegisteredAccount[]', await api('/hr/accounts'));
+  assert.equal(registered.length, 2);
+  assert.ok(registered.some(account => account.employee_id === businessId && account.role === 'employee'));
+  assert.ok(registered.every(account => !('password' in account) && !('password_hash' in account)));
+  assert.equal((await api('/catalog')).counts.events, 40);
+
   // Generic constraints validate required DTO fields against real JSON while
   // allowing harmless additional backend fields (plain satisfies rejects extras).
   const typeNames = [...new Set(contracts.map(item => item.type.replace('[]', '')))];
@@ -270,12 +381,21 @@ try {
   ])].join('\n');
   const contractFile = join(temporary, 'contracts.ts');
   writeFileSync(contractFile, source);
-  const typecheck = spawnSync(process.execPath, [join(web, 'node_modules/typescript/bin/tsc'), '--noEmit', '--skipLibCheck', '--strict', '--target', 'ES2022', '--module', 'ESNext', '--moduleResolution', 'Bundler', '--lib', 'ES2022,DOM', contractFile], { cwd: web, encoding: 'utf8', windowsHide: true });
-  assert.equal(typecheck.status, 0, `Actual HTTP JSON does not satisfy frontend DTOs:\n${typecheck.stdout}\n${typecheck.stderr}`);
+  const typecheck = spawnSync(process.execPath, [join(web, 'node_modules/typescript/bin/tsc'), '--noEmit', '--skipLibCheck', '--strict', '--target', 'ES2022', '--module', 'ESNext', '--jsx', 'react-jsx', '--moduleResolution', 'Bundler', '--lib', 'ES2022,DOM', contractFile], { cwd: web, encoding: 'utf8', windowsHide: true });
+  if (typecheck.status !== 0) writeFileSync(join(temporary, 'type-errors.log'), `${typecheck.stdout}\n${typecheck.stderr}`);
+  assert.equal(typecheck.status, 0, 'Actual HTTP JSON does not satisfy frontend DTOs; see private type-errors.log.');
   passed = true;
-  console.log(`PASS live HTTP integration: Kit import/reimport/422, ${contracts.length} typed response snapshots, rules/fallback recommendations, ordinary completion, two EV_036 occurrences/retries, RBAC, six statuses, HR totals, restart persistence and logout.`);
+  console.log(`PASS live HTTP integration: ${contracts.length} typed response snapshots; Kit import/reimport/422, rules/fallback, ordinary and two EV_036 completions, HR totals, persistence; real HR setup/password login/invite registration, Sales/Support development, role/privacy checks and ru/en/kk ID/progress invariance.`);
+} catch (error) {
+  // Assertion and compiler diagnostics may contain real Kit values. Keep them
+  // only in this ignored local run directory, never in console/CI output.
+  writeFileSync(join(temporary, 'failure.log'), error instanceof Error ? error.stack ?? error.message : String(error));
+  console.error('FAIL live HTTP integration; inspect the ignored local diagnostics directory.');
+  process.exitCode = 1;
 } finally {
   globalThis.fetch = nativeFetch;
+  if (originalWindow === undefined) delete globalThis.window;
+  else globalThis.window = originalWindow;
   await stop();
   // Only remove this run's generated directory, never a configured dataset/DB.
   assert.ok(temporary.startsWith(buildRoot + (process.platform === 'win32' ? '\\' : '/')));

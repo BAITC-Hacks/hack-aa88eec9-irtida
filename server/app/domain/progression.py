@@ -2,7 +2,7 @@ from collections import Counter, defaultdict
 
 
 # Invalidate persisted recommendations when deterministic calculations change.
-DOMAIN_VERSION = 'kit-progression-v4'
+DOMAIN_VERSION = 'kit-progression-v5'
 
 
 def gain_for(level: int, gain: int, max_level: int) -> int:
@@ -140,6 +140,12 @@ def _rank_candidates(employee: dict, catalog: dict, history: list[dict], path: d
                 f"в процессе {related['in_progress']}, просрочено {related['overdue']}."
                 if related else 'Истории участия в этом типе и формате пока нет; предпочтения неизвестны.'
             )
+        # Structured evidence lets presentation change language without parsing
+        # prose or recomputing scores. Canonical values remain in storage/cache.
+        evidence[0]['facts'] = {'role': employee['role'], 'grade': employee['grade'], 'next_grade': path['next_grade']}
+        evidence[1]['facts'] = {'skills': [x for x in path['skills'] if x['id'] in changes and x['gap'] is not None and x['gap'] > 0]}
+        evidence[2]['facts'] = {'benefit': benefit, 'critical': critical_benefit, 'next_grade': path['next_grade'], 'official': official}
+        evidence[3]['facts'] = {'type': event['type'], 'format': event.get('format'), 'counts': dict(related), 'skipped': skipped, 'official': official}
         projected_employee = {**employee, 'skills': {
             **employee['skills'], **{skill_id: change['after'] for skill_id, change in changes.items()},
         }}

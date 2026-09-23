@@ -1,0 +1,96 @@
+.auth-shell .welcome-header a { color: inherit; text-decoration: none; }
+.auth-card { width: 100%; max-width: 470px; }
+.auth-card .large-icon { width: 48px; height: 48px; margin-bottom: 15px; }
+.auth-form { margin-top: 24px; }
+.auth-form fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: 17px; min-width: 0; }
+.auth-form label, .invitation-form label, .catalog-filters label { display: grid; gap: 7px; font-size: 13px; font-weight: 600; }
+.auth-form input { width: 100%; min-width: 0; background: #fafcf9; }
+.auth-form label small { font-weight: 400; color: #63796c; }
+.password-field { position: relative; }
+.password-field input { padding-right: 90px; }
+.password-field button { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; }
+.auth-error { padding: 12px; display: flex; gap: 9px; background: #fff0ec; color: #a13723; border-radius: 10px; margin-top: 15px; font-size: 13px; }
+.auth-error svg { flex-shrink: 0; }
+.auth-switch { text-align: center; margin: 18px 0 0; font-size: 13px; }
+.auth-switch button { font-size: inherit; }
+.auth-card .login-foot { margin-top: 22px; }
+.role-diversity { margin-top: 40px; max-width: 510px; border-top: 1px solid #dce6d8; padding-top: 17px; }
+.role-diversity span { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #6c806f; text-transform: uppercase; }
+.role-diversity p { font-size: 13px; line-height: 1.8; margin-top: 6px; }
+.language-select select { padding: 8px 28px 8px 10px; font-size: 12px; background: #fff; min-height: 37px; }
+.topbar-actions { display: flex; align-items: center; gap: 17px; min-width: 0; }
+.account-trigger { background: transparent; border: 0; padding: 5px; border-radius: 10px; cursor: pointer; text-align: left; }
+.account-trigger:hover { background: #eef3e9; }
+.account-trigger > .icon { width: 15px; }
+.breadcrumb { flex-wrap: wrap; min-width: 0; }
+.breadcrumb button { font-size: 12px; }
+.breadcrumb strong { font-size: 12px; }
+.team-role-summary { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 23px; }
+.team-role-summary > span { font-size: 11px; padding: 5px 9px; border: 1px solid #dfe7db; border-radius: 14px; background: #f8fbf4; color: #52634e; }
+.team-role-summary b { padding-left: 5px; color: #25533c; }
+.hr-profile-navigation { margin-bottom: 25px; }
+.hr-profile-navigation .hr-profile-toolbar { margin-bottom: 10px; }
+.hr-profile-toolbar select { max-width: 470px; }
+.profile-tabs { display: flex; flex-wrap: wrap; gap: 5px; border-bottom: 1px solid #dfe7db; padding-bottom: 8px; }
+.profile-tabs button { border: 0; border-radius: 9px; background: transparent; color: #52634e; padding: 9px 14px; font-size: 12px; cursor: pointer; }
+.profile-tabs button.active { background: #e8f1df; color: #28543d; font-weight: 700; }
+.account-panel { max-width: 790px; display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; }
+.account-avatar { width: 70px; height: 70px; font-size: 23px; }
+.account-panel h2 { margin: 0 0 10px; }
+.account-details { grid-column: 1 / -1; margin: 0; }
+.account-details > div { display: grid; grid-template-columns: 170px 1fr; gap: 12px; padding: 17px 0; border-top: 1px solid #e5ebdf; }
+.account-details dt { color: #6d7a66; font-size: 13px; }
+.account-details dd { margin: 0; font-size: 14px; }
+.account-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 12px; }
+.catalog-filters { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; margin-bottom: 20px; }
+.catalog-filters label:first-child { flex: 1; min-width: 220px; }
+.catalog-filters label { min-width: 165px; }
+.catalog-filters input, .catalog-filters select { width: 100%; }
+.catalog-filters > span { padding-bottom: 10px; font-size: 12px; }
+.catalog-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.catalog-grid h2 { font-size: 19px; line-height: 1.35; }
+.catalog-grid h3 { font-size: 13px; margin: 18px 0 8px; }
+.catalog-grid .section-heading { gap: 10px; margin-bottom: 15px; }
+.catalog-grid .section-heading > .muted { font-size: 10px; }
+.catalog-meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 11px; margin: 14px 0; }
+.catalog-meta > span { border-radius: 6px; padding: 4px 7px; background: #edf3e7; }
+.catalog-meta .mandatory-tag { background: #fff2d9; color: #825d21; }
+.catalog-effects { list-style: none; padding: 0; margin: 0; }
+.catalog-effects li { display: flex; gap: 15px; justify-content: space-between; border-top: 1px solid #e5ebdf; padding: 7px 0; font-size: 12px; }
+.catalog-effects b { white-space: nowrap; color: #356b48; }
+.catalog-effects small { font-weight: 400; }
+.catalog-event details { margin-top: 16px; font-size: 12px; }
+.skills-catalog .panel { padding: 23px; }
+.skills-catalog p { font-size: 13px; }
+.invitation-form { display: flex; align-items: end; flex-wrap: wrap; gap: 15px; }
+.invitation-form label { min-width: 170px; }
+.invitation-form label:nth-child(2) { flex: 1; min-width: 260px; }
+.invitation-form select { max-width: 100%; width: 100%; }
+.invitation-result { margin-top: 22px; border: 1px solid #d8e6ca; background: #f5f9ee; border-radius: 12px; padding: 20px; }
+.invitation-result > code { display: block; overflow-wrap: anywhere; font-size: 18px; padding: 12px; background: #fff; border-radius: 7px; user-select: all; }
+.invitation-result > span { display: inline-block; margin: 10px; }
+
+@media (max-width: 1100px) {
+    .topbar-actions { gap: 8px; }
+    .topbar .breadcrumb { max-width: 42%; }
+    .topbar .user-name { max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
+}
+@media (max-width: 760px) {
+    .auth-card { max-width: none; }
+    .auth-shell .welcome-header { gap: 12px; }
+    .language-select select { max-width: 140px; }
+    .catalog-grid { grid-template-columns: 1fr; }
+    .topbar { gap: 10px; }
+    .topbar-actions { gap: 4px; }
+    .topbar .user-name { display: none; }
+    .topbar .breadcrumb { max-width: 45%; }
+    .account-trigger > .icon { display: none; }
+    .hr-profile-toolbar { align-items: stretch; }
+    .hr-profile-toolbar label { width: 100%; }
+    .hr-profile-toolbar select { max-width: 100%; min-width: 0; }
+    .catalog-filters label { flex: 1; }
+    .account-details > div { grid-template-columns: 1fr; gap: 5px; }
+    .account-panel { gap: 15px; }
+    .invitation-form label, .invitation-form label:nth-child(2) { min-width: 0; width: 100%; flex: 1 1 100%; }
+    .profile-tabs button { padding: 8px 10px; }
+}

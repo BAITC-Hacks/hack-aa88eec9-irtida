@@ -1,5 +1,7 @@
 // Isolated UI fixture server. No real backend, keys or employee data; never imported by production.
 // npm run build && npm run test:preview -> http://127.0.0.1:8011
+// Sign in as rules / ai / fallback / empty / unknown / slow / error / hr.
+// Any 12+ character test password is accepted by this isolated fixture only.
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
@@ -45,11 +47,27 @@ http.createServer(async (req, res) => {
     }
     let body = ''; for await (const chunk of req) { body += chunk; if (body.length > 5_000_000) return send(res, 413, { detail: 'Too large' }); }
     const id = /cq_fixture=([^;]+)/.exec(req.headers.cookie ?? '')?.[1];
+    if (path === '/api/v1/auth/status') return send(res, 200, { setup_required: false, registration: 'invite', demo_enabled: false });
+    if (path === '/api/v1/auth/login') {
+      const credentials = JSON.parse(body);
+      const account = accounts.find(item => item.id === credentials.username && item.role === credentials.role);
+      if (!account || typeof credentials.password !== 'string' || credentials.password.length < 12) return send(res, 401, { detail: 'Use a listed fixture username, the matching role and any 12+ character test password.' });
+      return send(res, 200, { role: account.role, employee_id: account.role === 'hr' ? null : account.id, username: account.id, display_name: account.label }, { 'Set-Cookie': `cq_fixture=${account.id}; HttpOnly; Path=/; SameSite=Lax` });
+    }
+    if (path === '/api/v1/auth/register') return send(res, 422, { detail: 'Fixture server: use the listed test logins. Test registration against the real backend with npm run test:e2e.' });
     if (path === '/api/v1/auth/demo-accounts') return send(res, 200, { enabled: true, accounts });
     if (path === '/api/v1/auth/demo') { const account = JSON.parse(body).account; if (!accounts.find(a => a.id === account)) return send(res, 400, { detail: 'Unknown test account' }); return send(res, 200, { role: account === 'hr' ? 'hr' : 'employee', employee_id: account === 'hr' ? null : account }, { 'Set-Cookie': `cq_fixture=${account}; HttpOnly; Path=/; SameSite=Lax` }); }
     if (!id) return send(res, 401, { detail: 'Sign in' });
     if (path === '/api/v1/auth/me') return send(res, 200, { role: id === 'hr' ? 'hr' : 'employee', employee_id: id === 'hr' ? null : id });
     if (path === '/api/v1/auth/logout') return send(res, 200, { ok: true }, { 'Set-Cookie': 'cq_fixture=; Max-Age=0; Path=/' });
+    if (path === '/api/v1/hr/accounts') return id === 'hr' ? send(res, 200, accounts.map(account => ({ id: account.id, username: account.id, display_name: account.label, role: account.role, employee_id: account.role === 'hr' ? null : account.id, created_at: 0 }))) : send(res, 403, { detail: 'HR only' });
+    if (path === '/api/v1/catalog') {
+      if (id !== 'hr') return send(res, 403, { detail: 'HR only' });
+      const p = profile('rules');
+      const skills = p.trajectory.skills.map(skill => ({ id: skill.id, name: skill.name, kind: skill.id === 'speaking' ? 'soft' : 'hard' }));
+      const events = [{ id: 'design-lab', title: 'Архитектура сервиса: от идеи до решения', type: 'workshop', roles: ['Backend Engineer'], grades: ['Middle'], effects: { design: { gain: 1, max_level: 4 } } }];
+      return send(res, 200, { skills, events, grade_rules: [], counts: { skills: skills.length, events: events.length, grade_rules: 0 } });
+    }
     if (path === '/api/v1/employees') return send(res, 200, ['rules', 'empty', 'unknown'].map(i => ({ ...profile(i).employee, name: i === 'rules' ? 'Демо-сотрудник' : i === 'empty' ? 'Демо: нет требований' : 'Демо: неизвестный уровень' })));
     if (path === '/api/v1/hr/overview') return send(res, 200, { employee_count: 3, gaps: [{ id: 'design', total_gap: 2, name: 'System Design', affected: 1, eligible: 1, unknown: 1, percent: 100 }, { id: 'unknown', total_gap: 0, name: 'Навык без оценки', affected: 0, eligible: 0, unknown: 3, percent: null }], no_step: [{ id: 'empty', name: 'Демо: нет требований', reason: 'no_grade_rule', reason_detail: 'Не заданы требования следующего грейда.', blockers: {} }], participation: [{ id: 'lab', title: 'Архитектура сервиса: от идеи до решения', completed: state('rules').done ? 1 : 0, missed: 1, declined: 1, no_show: 0, dropped: 0, in_progress: 0, overdue: 0 }] });
     if (path === '/api/v1/imports') { if (id !== 'hr') return send(res, 403, { detail: 'HR only' }); const payload = JSON.parse(body); if (!payload.employees) return send(res, 422, { detail: [{ loc: ['body', 'employees'], msg: 'Отсутствует список профилей' }] }); return send(res, 200, { schema: 'demo-v1', dry_run: url.searchParams.get('dry_run') === 'true', employees_added: payload.employees.length, history_added: (payload.history ?? []).length }); }

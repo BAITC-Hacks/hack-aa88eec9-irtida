@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 const { ProfileView } = await import(pathToFileURL(join(process.env.CQ_TEST_BUILD, 'components/ProfileView.mjs')));
 const { HrView } = await import(pathToFileURL(join(process.env.CQ_TEST_BUILD, 'components/HrView.mjs')));
 const { ImportPanel } = await import(pathToFileURL(join(process.env.CQ_TEST_BUILD, 'components/ImportPanel.mjs')));
+const { I18nProvider } = await import(pathToFileURL(join(process.env.CQ_TEST_BUILD, 'i18n.mjs')));
 
 function profile() {
   return { employee: { id: 'SYNTHETIC', name: 'Synthetic employee', role: 'Engineer', grade: 'Middle', tenure_months: 24, skills: { design: 0 } },
@@ -95,4 +96,38 @@ test('initial import UI selects kit and keeps save disabled until validation', (
   assert.match(html, /type="file" multiple/);
   assert.match(html, /class="primary" disabled="">2. Загрузить данные/);
   assert.match(html, /Заменить исходные демо-данные официальным китом/);
+});
+
+test('profile, HR and import render meaningful Russian, English and Kazakh labels', () => {
+  const p = profile(); p.available = [candidate()];
+  p.history = [{ id: 'one', title: 'Synthetic activity', status: 'no_show', occurred_at: '2026-10-02' }];
+  const props = { profile: p, recommendation: null, section: 'profile', employee: true, busy: '', onRecommend() {}, onComplete() {}, onNavigate() {}, celebration: null, clearCelebration() {} };
+  const metrics = { employee_count: 1, gaps: [], no_step: [], participation: [] };
+  const localized = (component, values, locale) => renderToStaticMarkup(createElement(I18nProvider, { initialLocale: locale }, createElement(component, values)));
+  for (const [locale, skills, completion, status, team, validate] of [
+    ['ru', 'Навыки для роста', 'Отметить выполненным', 'Неявка', 'Профили команды', '1. Проверить файлы'],
+    ['en', 'Skills for growth', 'Mark as complete', 'Did not attend', 'Team profiles', '1. Validate files'],
+    ['kk', 'Дамуға арналған дағдылар', 'Аяқталды деп белгілеу', 'Қатыспады', 'Ұжым профильдері', '1. Файлдарды тексеру'],
+  ]) {
+    const html = localized(ProfileView, props, locale);
+    for (const label of [skills, completion, status]) assert.ok(html.includes(label), `${locale}: ${label}`);
+    assert.ok(localized(HrView, { metrics, people: [], busy: '', hideImport: true, openProfile() {}, refresh: async () => {}, onImported: async () => {}, run: async () => true }, locale).includes(team));
+    assert.ok(localized(ImportPanel, { busy: '', run: async () => true, onImported: async () => {} }, locale).includes(validate));
+    if (locale === 'en') assert.doesNotMatch(html, /Навыки для роста|Отметить выполненным|История вашего пути/);
+  }
+});
+
+test('all eligible quests remain actionable beyond the recommendation and all catalog skills are visible', () => {
+  const p = profile();
+  p.available = [candidate(), { ...candidate(), id: 'SYNTHETIC_EXTRA', title: 'Extra eligible workshop', type: 'workshop' }];
+  p.recommendation = { items: [p.available[0]], mode: 'rules', reason: null, cached: false, provider: null, model: null, elapsed_ms: 1 };
+  const quests = renderProfile(p, { section: 'quests' });
+  assert.match(quests, /Extra eligible workshop/);
+  assert.equal((quests.match(/Отметить выполненным/g) ?? []).length, 3);
+  assert.match(quests, /Название, навык или ID/);
+  assert.match(quests, /value="workshop"/);
+  p.skill_catalog = Array.from({ length: 60 }, (_, index) => ({ id: `SYNTHETIC_${index}`, name: `Synthetic skill ${index}`, level: index === 59 ? null : 0, type: 'hard', category: 'Synthetic' }));
+  const skills = renderProfile(p, { section: 'skills' });
+  assert.match(skills, /Synthetic skill 59/);
+  assert.match(skills, /<b>\? \/ 5<\/b>/);
 });

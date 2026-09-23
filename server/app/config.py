@@ -12,7 +12,9 @@ load_dotenv(ROOT / '.env')
 @dataclass
 class Settings:
     database_url: str = field(default_factory=lambda: os.getenv('DATABASE_URL', f'sqlite:///{ROOT / "data/career-quest.db"}'))
-    demo_mode: bool = field(default_factory=lambda: os.getenv('DEMO_MODE', 'true').lower() == 'true')
+    demo_mode: bool = field(default_factory=lambda: os.getenv('DEMO_MODE', 'false').lower() == 'true')
+    # TestClient uses a non-IP hostname. Never enable this through environment.
+    allow_test_setup: bool = False
     cookie_secure: bool = field(default_factory=lambda: os.getenv('COOKIE_SECURE', 'false').lower() == 'true')
     provider: str = field(default_factory=lambda: os.getenv('AI_PROVIDER', 'rules'))
     openai_key: str = field(default_factory=lambda: os.getenv('OPENAI_API_KEY', ''), repr=False)

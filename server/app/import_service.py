@@ -3,12 +3,15 @@ import json
 from sqlalchemy import delete, select
 
 from .config import ROOT
-from .db import Activity, Catalog, Employee, ImportRecord, LoginSession, Recommendation
+from .db import Activity, Catalog, Employee, ImportRecord, Invitation, LoginSession, Recommendation, UserAccount
 from .ingest import ImportValidationError
 
 
 def remove_pristine_demo(db):
     """Explicit HR transition only; user imports and progress are never erased."""
+    if (db.scalar(select(UserAccount.id).where(UserAccount.employee_id.is_not(None)).limit(1))
+            or db.scalar(select(Invitation.code_hash).where(Invitation.employee_id.is_not(None)).limit(1))):
+        raise ImportValidationError('$', 'Нельзя заменять профили, связанные с учётными записями или приглашениями. Используйте отдельную базу данных.', 'request')
     seed = json.loads((ROOT / 'examples/demo.json').read_text(encoding='utf-8'))
     catalog = db.get(Catalog, 1)
     expected_catalog = {key: seed[key] for key in ('skills', 'events', 'grade_rules')}

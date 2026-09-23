@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from .ai.providers import PROMPT_VERSION
 from .db import Activity, Catalog, Employee
-from .domain.progression import DOMAIN_VERSION, development_plan
+from .domain.progression import DOMAIN_VERSION, development_plan, skill_level
 
 
 def snapshot(db, employee_id):
@@ -30,7 +30,8 @@ def employee_view(db, employee_id):
     employee, catalog, history = snapshot(db, employee_id)
     names = {e['id']: e['title'] for e in catalog['events']}
     plan = development_plan(employee, catalog, history)
-    return {'employee': employee, 'trajectory': plan['trajectory'], 'history': [{**h, 'title': names.get(h['event_id'], h['event_id'])} for h in history], 'available': plan['available'], 'recommendation': None}
+    skills = [{**s, 'level': skill_level(employee, s['id'])} for s in catalog['skills']]
+    return {'employee': employee, 'skill_catalog': skills, 'trajectory': plan['trajectory'], 'history': [{**h, 'title': names.get(h['event_id'], h['event_id'])} for h in history], 'available': plan['available'], 'recommendation': None}
 
 
 def hr_overview(db):

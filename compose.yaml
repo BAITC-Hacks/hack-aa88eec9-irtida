@@ -5,7 +5,7 @@ services:
       - "127.0.0.1:8000:8000"
     environment:
       DATABASE_URL: sqlite:////data/career-quest.db
-      DEMO_MODE: ${DEMO_MODE:-true}
+      DEMO_MODE: ${DEMO_MODE:-false}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8000,http://127.0.0.1:8000}
       AI_PROVIDER: ${AI_PROVIDER:-rules}

@@ -47,6 +47,42 @@ class LoginSession(Base):
     expires_at: Mapped[float] = mapped_column(Float)
 
 
+class UserAccount(Base):
+    __tablename__ = 'user_accounts'
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    username: Mapped[str] = mapped_column(String, unique=True, index=True)
+    display_name: Mapped[str] = mapped_column(String)
+    password_hash: Mapped[str] = mapped_column(String)
+    role: Mapped[str] = mapped_column(String)
+    employee_id: Mapped[str | None] = mapped_column(ForeignKey('employees.id'), nullable=True, unique=True)
+    created_at: Mapped[float] = mapped_column(Float)
+
+
+class AccountSession(Base):
+    # Additive table preserves existing session schema and explicitly separates
+    # password-authenticated sessions from opt-in legacy demo sessions.
+    __tablename__ = 'account_sessions'
+    token_hash: Mapped[str] = mapped_column(ForeignKey('sessions.token_hash', ondelete='CASCADE'), primary_key=True)
+    account_id: Mapped[str] = mapped_column(ForeignKey('user_accounts.id'), index=True)
+
+
+class Invitation(Base):
+    __tablename__ = 'invitations'
+    code_hash: Mapped[str] = mapped_column(String, primary_key=True)
+    role: Mapped[str] = mapped_column(String)
+    employee_id: Mapped[str | None] = mapped_column(ForeignKey('employees.id'), nullable=True, index=True)
+    created_at: Mapped[float] = mapped_column(Float)
+    expires_at: Mapped[float] = mapped_column(Float)
+    used_at: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+
+class AuthAttempt(Base):
+    __tablename__ = 'auth_attempts'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    scope: Mapped[str] = mapped_column(String, index=True)
+    created_at: Mapped[float] = mapped_column(Float, index=True)
+
+
 class AIRequest(Base):
     __tablename__ = 'ai_requests'
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from datetime import date
 
 from fastapi import Body, Depends, FastAPI, HTTPException, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.datastructures import UploadFile
@@ -14,11 +15,14 @@ from sqlalchemy import func, select, text
 from sqlalchemy.exc import OperationalError
 
 from .ai import providers
+from .auth import authenticated_account, install_auth_routes
+from .bootstrap import bootstrap_data
 from .config import ROOT, Settings
 from .db import AIRequest, Activity, Catalog, Employee, LoginSession, Recommendation, connect
 from .domain.progression import candidates, trajectory
 from .ingest import ImportValidationError, import_bundle
 from .import_service import load_kit
+from .localization import LocalizationMiddleware
 from .middleware import BodyLimitMiddleware
 from .schemas import DatasetBundle, DemoLogin, Selection
 from .services import cache_key, employee_view, hr_overview, snapshot
@@ -35,6 +39,7 @@ def create_app(settings: Settings | None = None):
         engine, sessions = connect(settings.database_url)
         app.state.sessions = sessions
         app.state.settings = settings
+        bootstrap_data(sessions, settings)
         with sessions() as db:
             db.connection().exec_driver_sql('BEGIN IMMEDIATE')
             if settings.demo_mode and db.get(Catalog, 1) is None:
@@ -44,6 +49,14 @@ def create_app(settings: Settings | None = None):
 
     app = FastAPI(title='Career Quest', version='0.1.0', lifespan=lifespan)
     app.add_middleware(BodyLimitMiddleware)
+
+    @app.exception_handler(RequestValidationError)
+    async def invalid_request(request, exc):
+        # Passwords and invitation codes must not be echoed in validation output.
+        return JSONResponse({'detail': [
+            {key: error[key] for key in ('loc', 'msg', 'type') if key in error}
+            for error in exc.errors()
+        ]}, 422)
 
     @app.exception_handler(OperationalError)
     async def database_busy(request, exc):
@@ -66,14 +79,13 @@ def create_app(settings: Settings | None = None):
             response.headers['Cache-Control'] = 'no-store'
         return response
 
+    # Wrap mutation checks too, so their early 403 responses respect the locale.
+    app.add_middleware(LocalizationMiddleware)
+
     def user(request: Request):
         token = request.cookies.get('cq_session', '')
-        digest = hashlib.sha256(token.encode()).hexdigest()
         with app.state.sessions() as db:
-            row = db.get(LoginSession, digest)
-            if not row or row.expires_at <= time.time():
-                raise HTTPException(401, 'Войдите в приложение')
-            return {'role': row.role, 'employee_id': row.employee_id}
+            return authenticated_account(db, token, allow_demo=settings.demo_mode)
 
     def hr(account=Depends(user)):
         if account['role'] != 'hr':
@@ -83,6 +95,8 @@ def create_app(settings: Settings | None = None):
     def authorize(account, employee_id, allow_hr=True):
         if account['employee_id'] != employee_id and not (allow_hr and account['role'] == 'hr'):
             raise HTTPException(403, 'Нет доступа к этому профилю')
+
+    install_auth_routes(app, settings, hr)
 
     @app.get(f'{API}/health')
     def health():
@@ -141,6 +155,14 @@ def create_app(settings: Settings | None = None):
     def employees(account=Depends(hr)):
         with app.state.sessions() as db:
             return [e.profile for e in db.scalars(select(Employee).order_by(Employee.id))]
+
+    @app.get(f'{API}/catalog')
+    def catalog(account=Depends(hr)):
+        with app.state.sessions() as db:
+            row = db.get(Catalog, 1)
+            payload = row.payload if row else {}
+            result = {key: payload.get(key, []) for key in ('skills', 'events', 'grade_rules')}
+            return {**result, 'counts': {key: len(value) for key, value in result.items()}}
 
     @app.get(f'{API}/employees/{{employee_id}}')
     def profile(employee_id: str, account=Depends(user)):

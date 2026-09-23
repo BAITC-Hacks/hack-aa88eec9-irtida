@@ -2,7 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
-const { percent, milestones, recommendationLabel, participationCounts } = await import(pathToFileURL(join(process.env.CQ_TEST_BUILD, 'view-model.mjs')));
+const { percent, milestones, recommendationLabel, participationCounts, localizedLabels, formatDate } = await import(pathToFileURL(join(process.env.CQ_TEST_BUILD, 'view-model.mjs')));
+const { getLocale, isLocale } = await import(pathToFileURL(join(process.env.CQ_TEST_BUILD, 'i18n.mjs')));
 const { api, ApiError, importKit, completeEvent } = await import(pathToFileURL(join(process.env.CQ_TEST_BUILD, 'api.mjs')));
 const { importReducer, initialImportState } = await import(pathToFileURL(join(process.env.CQ_TEST_BUILD, 'import-state.mjs')));
 const profile = () => ({ employee: { skills: { design: 2, python: 3 } }, history: [], trajectory: { coverage: 63, skills: [{ id: 'design', level: 2, required: 4, gap: 2 }, { id: 'python', level: 3, required: 4, gap: 1 }] } });
@@ -154,4 +155,23 @@ test('HR exact status counts do not count no_show twice via missed compatibility
   const counts = participationCounts({ completed: 5, missed: 7, no_show: 6, declined: 2, dropped: 3, in_progress: 4, overdue: 1 });
   assert.deepEqual(counts, { completed: 5, missed: 1, no_show: 6, declined: 2, dropped: 3, in_progress: 4, overdue: 1 });
   assert.equal(Object.values(counts).reduce((sum, value) => sum + value, 0), 22);
+});
+
+test('locale selection validates persisted values and all supported locales keep modes distinct', t => {
+  const original = Object.getOwnPropertyDescriptor(globalThis, 'window');
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: { localStorage: { getItem: () => 'invalid' } } });
+  t.after(() => { if (original) Object.defineProperty(globalThis, 'window', original); else delete globalThis.window; });
+  assert.equal(getLocale(), 'ru');
+  for (const locale of ['ru', 'en', 'kk']) {
+    window.localStorage.getItem = () => locale;
+    assert.equal(getLocale(), locale);
+    assert.equal(isLocale(locale), true);
+    const modes = ['ai', 'rules', 'fallback', 'no_candidates'].map(mode => recommendationLabel({ mode, cached: false }, locale));
+    assert.equal(new Set(modes).size, 4);
+    assert.equal(Object.keys(localizedLabels(locale).statusLabels).length, 7);
+    assert.notEqual(recommendationLabel({ mode: 'ai', cached: true }, locale), modes[0]);
+    assert.equal(formatDate('invalid date', locale), 'invalid date');
+  }
+  assert.notEqual(formatDate('2026-10-02', 'en'), formatDate('2026-10-02', 'ru'));
+  assert.notEqual(formatDate('2026-10-02', 'kk'), formatDate('2026-10-02', 'ru'));
 });

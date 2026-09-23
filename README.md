@@ -25,7 +25,7 @@ AI-навигатор развития сотрудников для HackAlem AI
 
 Другие ОС или терминал: `python run.py`, с `--open-browser` для открытия браузера. Для Python вне PATH: `./run.ps1 -PythonExe 'C:\path\to\python.exe'`. Launcher добавляет loopback-origin выбранного порта к `ALLOWED_ORIGINS`, сохраняя остальные адреса.
 
-После обновления зависимостей: `.venv\Scripts\python.exe -m pip install -r server/requirements-dev.txt` и `npm --prefix web ci`.
+После обновления зависимостей: `.venv\Scripts\python.exe -m pip install -r server/requirements-dev.txt` и `npm.cmd --prefix web ci`.
 
 ## Полный Kit и сохранение данных
 
@@ -41,14 +41,14 @@ AI-навигатор развития сотрудников для HackAlem AI
 
 Импорт выполняется один раз. Повторный запуск сохраняет аккаунты, приглашения, прогресс и профили жюри. Старая база `data/career-quest.db` не удаляется. Явный `DATABASE_URL` имеет приоритет: неизменённый исходный demo можно заменить, а demo с прогрессом требует нового пути БД.
 
-На другой машине положите Kit в этот каталог либо задайте `CAREER_QUEST_KIT_DIR` абсолютным путём к четырём файлам. Без Kit приложение запускается с пустой базой: первый HR загрузит набор через **Данные и импорт**. Kit и SQLite не публикуются в Git.
+На другой машине положите Kit в этот каталог либо задайте `CAREER_QUEST_KIT_DIR` абсолютным путём к четырём файлам. Без Kit приложение запускается с пустой базой: первый HR загрузит набор через **Импорт данных**. Kit и SQLite не публикуются в Git.
 
 `employees.json` содержит **профили**, а не готовые пароли. Все 40 событий видны HR, но конкретному сотруднику предлагаются только подходящие по роли, грейду, prerequisites, истории, расписанию и приросту. Четыре обязательных события исключены из добровольных квестов.
 
 ## Первый вход и аккаунты
 
 1. На новой базе создайте первый HR-аккаунт: имя, логин и пароль от 12 символов. Настройка доступна только с компьютера сервера и закрывается после создания аккаунта.
-2. В HR → **Доступ и аккаунты** выберите сотрудника из Kit и создайте приглашение. Для второго HR выберите роль HR.
+2. В HR → **Аккаунты и доступ** выберите сотрудника из Kit и создайте приглашение. Для второго HR выберите роль HR.
 3. Передайте одноразовый код участнику. Он действует 24 часа; в базе хранится только хеш. Приложение само не отправляет письма.
 4. Участник выбирает **Регистрация по приглашению**, роль, собственный логин и пароль. Код связывает аккаунт с конкретным employee_id.
 5. Затем используется обычный вход. Выбор «HR» в форме не повышает права: роль проверяет сервер.
@@ -97,7 +97,7 @@ Live smoke после настройки: `.venv\Scripts\python.exe -m server.ap
 
 ## Импорт Kit и профилей жюри
 
-HR → **Данные и импорт** → выбрать `employees.json`, `skills.json`, `events.json`, `activity_history.csv` → **Проверить** → просмотреть счётчики → **Импортировать**. Изменение файлов требует новой проверки. Импорт атомарен; ошибки содержат файл и поле.
+HR → **Импорт данных** → выбрать `employees.json`, `skills.json`, `events.json`, `activity_history.csv` → **Проверить** → просмотреть счётчики → **Импортировать**. Изменение файлов требует новой проверки. Импорт атомарен; ошибки содержат файл и поле.
 
 Для дополнительного профиля/истории в базе Kit достаточно `employees.json` и/или `activity_history.csv`. Сохраняйте исходные оболочки JSON с `meta`, имена файлов и колонки CSV. Ссылки должны существовать или поступать одновременно. Повтор одинаковых записей не создаёт дублей; конфликтующий ID отклоняет запрос. Форматы demo-v1 и kit-v1 не смешиваются.
 
@@ -133,14 +133,16 @@ python run.py
 ```powershell
 .venv\Scripts\python.exe -m pytest -q
 .venv\Scripts\python.exe -m pip check
-npm --prefix web test
-npm --prefix web run build
+npm.cmd --prefix web test
+npm.cmd --prefix web run build
 git diff --check
 ```
 
-Для полного Kit: `$env:CAREER_QUEST_KIT_DIR=(Resolve-Path 'career_quest_dataset/case_1/career_quest_dataset').Path`. Без переменной внешние данные пропускаются; CI использует независимые synthetic fixtures. Живой HTTP-прогон через frontend API-клиент: `npm --prefix web run test:integration`. При проблемах ACL pytest используйте новый пустой путь `--basetemp=data/private/pytest-run-unique -p no:cacheprovider`.
+Браузерный сценарий: `npm.cmd --prefix web run test:e2e` (нужен установленный Edge; `CQ_BROWSER_CHANNEL=chrome` выбирает Chrome). Тест использует отдельную синтетическую БД, не браузер пользователя. Скриншоты сохраняются в игнорируемом `web/test-results/`.
 
-Разработка: backend `python -m server.app.local_server --port 8000`; отдельно `npm --prefix web run dev`. Добавьте Vite origin в `ALLOWED_ORIGINS` для POST. Документация API — `/docs`.
+На Linux/macOS используйте `npm` вместо `npm.cmd`. Для полного Kit: `$env:CAREER_QUEST_KIT_DIR=(Resolve-Path 'career_quest_dataset/case_1/career_quest_dataset').Path`. Без переменной внешние данные пропускаются; CI использует независимые synthetic fixtures. Живой HTTP-прогон через frontend API-клиент: `npm.cmd --prefix web run test:integration`. При проблемах ACL pytest используйте новый пустой путь `--basetemp=data/private/pytest-run-unique -p no:cacheprovider`.
+
+Разработка: backend `python -m server.app.local_server --port 8000`; отдельно `npm.cmd --prefix web run dev`. Добавьте Vite origin в `ALLOWED_ORIGINS` для POST. Документация API — `/docs`.
 
 ## Docker
 

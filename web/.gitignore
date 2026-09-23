@@ -1,1 +1,4 @@
 .test-build/
+.npm-cache/
+test-results/
+playwright-report/

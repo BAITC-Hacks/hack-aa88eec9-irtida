@@ -1,6 +1,22 @@
 @layer base, responsive, polish;
 @import url('./styles/responsive.css') layer(responsive);
 @layer polish {
+  .quest-catalog { font-size: 13px; }
+  .quest-catalog > .quest-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .quest-catalog .quest-card { min-width: 0; }
+  .quest-catalog .quest-card strong { font-size: inherit; }
+  .quest-catalog .quest-card small { font-size: 12px; }
+  .quest-catalog .catalog-filters { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
+  .quest-catalog .catalog-filters label { display: grid; gap: 6px; flex: 1 1 180px; min-width: 0; font-size: 12px; }
+  .quest-catalog .catalog-filters input, .quest-catalog .catalog-filters select { width: 100%; min-width: 0; }
+  .all-skills .search-label { display: block; margin: 14px 0; }
+  .all-skills .search-label input { width: 100%; }
+  .all-skills li { gap: 12px; }
+  .all-skills li b { flex-shrink: 0; }
+  .stat > .icon { width: 32px; height: 32px; flex-shrink: 0; color: var(--green); }
+  .celebration > .icon { width: 36px; height: 36px; flex-shrink: 0; }
+  .empty-quest > .icon { width: 42px; height: 42px; }
+  .ai-loading > .icon { width: 28px; height: 28px; flex-shrink: 0; }
   .session-date, .critical-summary {
     display: flex;
     align-items: center;

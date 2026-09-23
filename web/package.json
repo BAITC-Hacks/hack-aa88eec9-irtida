@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node tests/run.mjs",
+    "test:e2e": "npm run build && node tests/e2e.mjs",
     "test:integration": "node tests/integration-api.mjs",
     "test:preview": "node tests/preview-server.mjs",
     "dev": "vite --configLoader native --host 127.0.0.1",
@@ -16,6 +17,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.4.0",
