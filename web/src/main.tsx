@@ -1,668 +1,140 @@
-import { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
-import {
-  api,
-  type Account,
-  type Employee,
-  type Metrics,
-  type Profile,
-  type Recommendations,
-} from "./api";
-import "./style.css";
-
-type DemoAccount = { id: string; label: string; role: string };
-const statusLabels: Record<string, string> = {
-  completed: "Завершено",
-  missed: "Пропуск",
-  declined: "Отказ",
-};
-const reasonLabels: Record<string, string> = {
-  no_grade_rule: "Не заданы требования следующего грейда",
-  missing_skills: "Недостаточно данных о навыках",
-  no_eligible_activity: "Нет подходящей активности в каталоге",
-};
-
+import { useEffect, useRef, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { api, ApiError, type Account, type Candidate, type DemoAccount, type Employee, type Metrics, type Profile, type Recommendations } from './api';
+import { Brand, Icon, type IconName } from './components/Icons';
+import { ProfileView, type Section, type Celebration } from './components/ProfileView';
+import { HrView } from './components/HrView';
+import { initials, percent } from './view-model';
+import './style.css';
+const nav: {
+    id: Section;
+    label: string;
+    icon: IconName;
+}[] = [
+    { id: 'profile', label: 'Мой путь', icon: 'route' }, { id: 'quests', label: 'Мои квесты', icon: 'compass' },
+    { id: 'skills', label: 'Навыки', icon: 'chart' }, { id: 'achievements', label: 'Достижения', icon: 'award' }, { id: 'history', label: 'История', icon: 'clock' },
+];
+const busyLabels: Record<string, string> = { login: 'Открываем пространство', profile: 'Загружаем профиль', logout: 'Завершаем сессию', complete: 'Сохраняем результат квеста', refresh: 'Обновляем данные', 'import-check': 'Проверяем файл', 'import-save': 'Сохраняем данные' };
 function App() {
-  const [account, setAccount] = useState<Account | null>(null);
-  const [demo, setDemo] = useState<DemoAccount[]>([]);
-  const [booting, setBooting] = useState(true);
-  const [busy, setBusy] = useState("");
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
-  const [screen, setScreen] = useState<"profile" | "hr">("profile");
-  const [people, setPeople] = useState<Employee[]>([]);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [recommendation, setRecommendation] = useState<Recommendations | null>(
-    null,
-  );
-  const [metrics, setMetrics] = useState<Metrics | null>(null);
-
-  async function loadProfile(id: string) {
-    const data = await api<Profile>(`/employees/${id}`);
-    setProfile(data);
-    setRecommendation(data.recommendation || null);
-  }
-
-  async function loadWorkspace(who: Account) {
-    if (who.role === "hr") {
-      const [employees, overview] = await Promise.all([
-        api<Employee[]>("/employees"),
-        api<Metrics>("/hr/overview"),
-      ]);
-      setPeople(employees);
-      setMetrics(overview);
-      setScreen("hr");
-      if (employees.length) await loadProfile(employees[0].id);
-    } else if (who.employee_id) {
-      setScreen("profile");
-      await loadProfile(who.employee_id);
-    }
-  }
-
-  useEffect(() => {
-    void (async () => {
-      try {
-        const accounts = await api<{ accounts: DemoAccount[] }>(
-          "/auth/demo-accounts",
-        );
-        setDemo(accounts.accounts);
-        const response = await fetch("/api/v1/auth/me");
-        if (response.ok) {
-          const who = (await response.json()) as Account;
-          setAccount(who);
-          await loadWorkspace(who);
+    const [account, setAccount] = useState<Account | null>(null);
+    const [demo, setDemo] = useState<DemoAccount[]>([]);
+    const [booting, setBooting] = useState(true);
+    const [busy, setBusy] = useState('');
+    const busyRef = useRef(false);
+    const [error, setError] = useState('');
+    const [section, setSection] = useState<Section>('profile');
+    const [people, setPeople] = useState<Employee[]>([]);
+    const [profile, setProfile] = useState<Profile | null>(null);
+    const [recommendation, setRecommendation] = useState<Recommendations | null>(null);
+    const [metrics, setMetrics] = useState<Metrics | null>(null);
+    const [celebration, setCelebration] = useState<Celebration | null>(null);
+    const [online, setOnline] = useState(navigator.onLine);
+    const [loginRole, setLoginRole] = useState('employee');
+    const headingRef = useRef<HTMLElement>(null);
+    function clearSession() { setAccount(null); setProfile(null); setPeople([]); setMetrics(null); setRecommendation(null); setCelebration(null); setSection('profile'); }
+    function assignProfile(data: Profile) { setProfile(data); setRecommendation(data.recommendation ?? null); }
+    async function loadProfile(id: string) { assignProfile(await api<Profile>(`/employees/${encodeURIComponent(id)}`)); }
+    async function refreshHr() { const [employees, overview] = await Promise.all([api<Employee[]>('/employees'), api<Metrics>('/hr/overview')]); setPeople(employees); setMetrics(overview); }
+    async function loadWorkspace(who: Account) {
+        if (who.role === 'hr') {
+            setSection('hr');
+            await refreshHr();
         }
-      } catch (e) {
-        setError((e as Error).message);
-      } finally {
-        setBooting(false);
-      }
-    })();
-  }, []);
-
-  async function run(label: string, action: () => Promise<void>) {
-    setBusy(label);
-    setError("");
-    setNotice("");
-    try {
-      await action();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy("");
+        else if (who.employee_id) {
+            setSection('profile');
+            await loadProfile(who.employee_id);
+        }
     }
-  }
-
-  async function login(id: string) {
-    const who = await api<Account>("/auth/demo", {
-      method: "POST",
-      body: JSON.stringify({ account: id }),
-    });
-    setAccount(who);
-    await loadWorkspace(who);
-  }
-
-  async function importFile(file: File) {
-    if (file.size > 5_000_000) throw new Error("Файл должен быть меньше 5 МБ");
-    const body = await file.text();
-    JSON.parse(body);
-    await api("/imports?dry_run=true", { method: "POST", body });
-    const result = await api<{
-      employees_added: number;
-      history_added: number;
-    }>("/imports", { method: "POST", body });
-    await loadWorkspace(account!);
-    const accounts = await api<{ accounts: DemoAccount[] }>(
-      "/auth/demo-accounts",
-    );
-    setDemo(accounts.accounts);
-    setNotice(
-      `Импорт завершён: новых профилей — ${result.employees_added}, записей истории — ${result.history_added}.`,
-    );
-  }
-
-  const employee = profile?.employee;
-
-  return (
-    <div className="app">
-      <header className="topbar">
-        <a className="brand" href="/" aria-label="Career Quest, главная">
-          <span className="brand-mark">cq</span>
-          <span>
-            career<span className="brand-light">quest</span>
-          </span>
-        </a>
-        <div className="header-right">
-          <span className="demo-tag">HACKALEM · DEMO</span>
-          {account && (
-            <button
-              className="text-button"
-              disabled={!!busy}
-              onClick={() =>
-                void run("Выход", async () => {
-                  await api("/auth/logout", { method: "POST" });
-                  setAccount(null);
-                  setProfile(null);
-                  setMetrics(null);
-                  setRecommendation(null);
-                })
-              }
-            >
-              Выйти
-            </button>
-          )}
-        </div>
-      </header>
-
-      {error && (
-        <div className="message error" role="alert">
-          {error}
-        </div>
-      )}
-      {notice && (
-        <div className="message success" role="status">
-          {notice}
-        </div>
-      )}
-      {busy && (
-        <div className="working" role="status">
-          {busy}…
-        </div>
-      )}
-
-      {booting ? (
-        <main>
-          <p>Загружаем Career Quest…</p>
-        </main>
-      ) : !account ? (
-        <main className="welcome">
-          <section className="welcome-copy">
-            <div className="eyebrow">ВАШ СЛЕДУЮЩИЙ ШАГ</div>
-            <h1>
-              Развитие,
-              <br />в котором
-              <br />
-              <em>виден смысл.</em>
-            </h1>
-            <p>
-              Свяжите сегодняшнее обучение с навыками, которые нужны для
-              следующего уровня.
-            </p>
-            <div className="welcome-path">
-              <span>Профиль</span>
-              <b>→</b>
-              <span>Следующий шаг</span>
-              <b>→</b>
-              <span>Прогресс</span>
-            </div>
-          </section>
-          <section className="panel login-panel">
-            <div className="eyebrow">ПОПРОБОВАТЬ СЦЕНАРИЙ</div>
-            <h2>Выберите роль</h2>
-            <p className="muted">
-              Локальная демонстрация на синтетических данных. Пароли и
-              корпоративный вход подключаются отдельно.
-            </p>
-            <div className="account-list">
-              {demo.map((item) => (
-                <button
-                  className="account-option"
-                  key={item.id}
-                  disabled={!!busy}
-                  onClick={() =>
-                    void run("Открываем профиль", () => login(item.id))
-                  }
-                >
-                  <span className="avatar">
-                    {item.role === "hr" ? "HR" : item.id.slice(-2)}
-                  </span>
-                  <span>
-                    <strong>{item.label}</strong>
-                    <small>
-                      {item.role === "hr"
-                        ? "Обзор развития команды"
-                        : "Личная траектория развития"}
-                    </small>
-                  </span>
-                  <span className="arrow">↗</span>
-                </button>
-              ))}
-            </div>
-            {!demo.length && (
-              <p>
-                Демонстрационный вход отключён. Настройте авторизацию или
-                включите DEMO_MODE для локальной проверки.
-              </p>
-            )}
-          </section>
-        </main>
-      ) : (
-        <main>
-          <nav className="tabs" aria-label="Разделы">
-            <button
-              className={screen === "profile" ? "active" : ""}
-              onClick={() => setScreen("profile")}
-            >
-              {account.role === "hr" ? "Профиль сотрудника" : "Моя траектория"}
-            </button>
-            {account.role === "hr" && (
-              <button
-                className={screen === "hr" ? "active" : ""}
-                onClick={() =>
-                  void run("Обновляем HR-срез", async () => {
-                    setMetrics(await api<Metrics>("/hr/overview"));
-                    setScreen("hr");
-                  })
+    async function boot() {
+        setBooting(true);
+        setError('');
+        try {
+            // Existing sessions remain usable when demo login is disabled.
+            let who: Account | null = null;
+            try {
+                who = await api<Account>('/auth/me');
+            }
+            catch (e) {
+                if (!(e instanceof ApiError && e.status === 401))
+                    throw e;
+            }
+            if (who) {
+                setAccount(who);
+                await loadWorkspace(who);
+            }
+            else {
+                clearSession();
+                const result = await api<{
+                    enabled: boolean;
+                    accounts: DemoAccount[];
+                }>('/auth/demo-accounts');
+                setDemo(result.enabled === false ? [] : result.accounts);
+            }
+        }
+        catch (e) {
+            setError((e as Error).message);
+        }
+        finally {
+            setBooting(false);
+        }
+    }
+    useEffect(() => { void boot(); const on = () => setOnline(true); const off = () => setOnline(false); window.addEventListener('online', on); window.addEventListener('offline', off); return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); }; }, []);
+    async function run(label: string, action: () => Promise<void>) {
+        if (busyRef.current)
+            return false;
+        busyRef.current = true;
+        setBusy(label);
+        setError('');
+        try {
+            await action();
+            return true;
+        }
+        catch (e) {
+            if (e instanceof ApiError && e.status === 401) {
+                clearSession();
+                try {
+                    setDemo((await api<{
+                        accounts: DemoAccount[];
+                    }>('/auth/demo-accounts')).accounts);
                 }
-              >
-                HR-обзор
-              </button>
-            )}
-          </nav>
-
-          {screen === "profile" && profile && (
-            <>
-              {account.role === "hr" && (
-                <label className="profile-selector">
-                  Сотрудник{" "}
-                  <select
-                    value={employee!.id}
-                    disabled={!!busy}
-                    onChange={(e) =>
-                      void run("Загружаем профиль", () =>
-                        loadProfile(e.target.value),
-                      )
-                    }
-                  >
-                    {people.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.id} · {p.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              <div className="page-heading">
-                <div>
-                  <div className="eyebrow">ЛИЧНАЯ ТРАЕКТОРИЯ</div>
-                  <h1>{employee!.name}</h1>
-                  <p className="muted">
-                    {employee!.role} <span className="dot">·</span>{" "}
-                    {employee!.grade} <span className="dot">·</span>{" "}
-                    {employee!.tenure_months} мес. в компании
-                  </p>
-                </div>
-                <span className="pill">{employee!.id}</span>
-              </div>
-              <div className="profile-grid">
-                <section className="panel trajectory">
-                  <div className="section-top">
-                    <h2>Путь к следующему уровню</h2>
-                    <span className="step-number">01</span>
-                  </div>
-                  <div className="grade-path">
-                    <span>{employee!.grade}</span>
-                    <span className="path-line" />
-                    <strong>
-                      {profile.trajectory.next_grade ||
-                        "Следующий уровень не задан"}
-                    </strong>
-                  </div>
-                  <div className="coverage">
-                    <strong>
-                      {profile.trajectory.coverage ?? "—"}
-                      <small>
-                        {profile.trajectory.coverage !== null ? "%" : ""}
-                      </small>
-                    </strong>
-                    <span>
-                      требований по навыкам
-                      <br />
-                      уже выполнено
-                    </span>
-                  </div>
-                  <p className="caption">
-                    Покрытие навыков не означает автоматическое повышение
-                    грейда.
-                  </p>
-                  <div className="skill-list">
-                    {profile.trajectory.skills.map((s) => (
-                      <div className="skill" key={s.id}>
-                        <div>
-                          <strong>{s.name}</strong>
-                          <span>
-                            {s.level ?? "?"} <small>/ {s.required}</small>
-                          </span>
-                        </div>
-                        <div className="skill-track">
-                          <span
-                            style={{
-                              width: `${Math.min(100, ((s.level || 0) / Math.max(1, s.required)) * 100)}%`,
-                            }}
-                          />
-                        </div>
-                        <small>
-                          {s.gap === null
-                            ? "Уровень неизвестен"
-                            : s.gap > 0
-                              ? `До цели: ${s.gap} ур.`
-                              : "Требование выполнено"}
-                        </small>
-                      </div>
-                    ))}
-                  </div>
-                  {!profile.trajectory.next_grade && (
-                    <p className="empty">
-                      В каталоге нет правил следующего грейда. HR может уточнить
-                      траекторию.
-                    </p>
-                  )}
-                  <details>
-                    <summary>Все текущие навыки</summary>
-                    <ul className="plain-list">
-                      {Object.entries(employee!.skills).map(([id, value]) => (
-                        <li key={id}>
-                          {id.replace("SK_", "").replaceAll("_", " ")}{" "}
-                          <strong>{value}/5</strong>
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                </section>
-
-                <section className="recommendations">
-                  <div className="section-top">
-                    <div>
-                      <div className="eyebrow">ПОДОБРАНО ПОД ВАШ КОНТЕКСТ</div>
-                      <h2>Следующие шаги</h2>
-                    </div>
-                    <button
-                      className="primary"
-                      disabled={!!busy}
-                      onClick={() =>
-                        void run("Подбираем следующие шаги", async () =>
-                          setRecommendation(
-                            await api<Recommendations>(
-                              `/employees/${employee!.id}/recommendations`,
-                              { method: "POST" },
-                            ),
-                          ),
-                        )
-                      }
-                    >
-                      {recommendation ? "Обновить" : "Подобрать шаги"}{" "}
-                      <span>↗</span>
-                    </button>
-                  </div>
-                  {!recommendation && (
-                    <div className="panel empty-state">
-                      <span className="compass">↗</span>
-                      <h3>Начните с одного полезного шага</h3>
-                      <p>
-                        Учтём ваш грейд, разрывы по навыкам и историю участия.
-                      </p>
-                      <small>
-                        Доступных активностей: {profile.available.length}
-                      </small>
-                    </div>
-                  )}
-                  {recommendation && (
-                    <>
-                      <div
-                        className={`mode-label ${recommendation.mode === "ai" ? "ai" : ""}`}
-                      >
-                        {recommendation.mode === "ai"
-                          ? `AI · ${recommendation.model}`
-                          : recommendation.mode === "fallback"
-                            ? "AI недоступен · подбор по правилам"
-                            : recommendation.mode === "no_candidates"
-                              ? "Нет подходящего шага"
-                              : "Подбор по правилам · AI не подключён"}
-                        {recommendation.cached && " · сохранённый результат"}
-                      </div>
-                      {recommendation.reason && (
-                        <p className="muted">{recommendation.reason}</p>
-                      )}
-                      {recommendation.items.map((event, index) => (
-                        <article
-                          className="panel recommendation-card"
-                          key={event.id}
-                        >
-                          <div className="card-meta">
-                            <span>
-                              {index === 0
-                                ? "РЕКОМЕНДУЕМ НАЧАТЬ ЗДЕСЬ"
-                                : `ВАРИАНТ ${index + 1}`}
-                            </span>
-                            <span>{event.type}</span>
-                          </div>
-                          <h3>{event.title}</h3>
-                          <div className="gains">
-                            {Object.entries(event.changes).map(
-                              ([key, change]) => (
-                                <span className="gain" key={key}>
-                                  {change.name}{" "}
-                                  <strong>
-                                    {change.before} → {change.after}
-                                  </strong>
-                                </span>
-                              ),
-                            )}
-                          </div>
-                          <details open={index === 0}>
-                            <summary>Почему этот шаг подходит</summary>
-                            <ul className="evidence">
-                              {event.evidence.map((f) => (
-                                <li key={f.factor}>{f.text}</li>
-                              ))}
-                            </ul>
-                          </details>
-                          {account.role === "employee" && (
-                            <button
-                              className="complete-button"
-                              disabled={!!busy}
-                              onClick={() =>
-                                void run("Сохраняем прогресс", async () => {
-                                  const result = await api<{
-                                    profile: Profile;
-                                    already_completed: boolean;
-                                  }>(
-                                    `/employees/${employee!.id}/events/${event.id}/complete`,
-                                    { method: "POST" },
-                                  );
-                                  setProfile(result.profile);
-                                  setRecommendation(null);
-                                  setNotice(
-                                    result.already_completed
-                                      ? "Это прохождение уже учтено."
-                                      : "Активность завершена. Навыки и траектория обновлены.",
-                                  );
-                                })
-                              }
-                            >
-                              Отметить выполненной <span>✓</span>
-                            </button>
-                          )}
-                        </article>
-                      ))}
-                    </>
-                  )}
-                </section>
-              </div>
-              <section className="panel history">
-                <div className="section-top">
-                  <h2>История участия</h2>
-                  <span className="muted">
-                    {profile.history.length} записей
-                  </span>
-                </div>
-                {profile.history.length ? (
-                  <div className="table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Активность</th>
-                          <th>Дата</th>
-                          <th>Результат</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {profile.history.map((h) => (
-                          <tr key={h.id}>
-                            <td>{h.title}</td>
-                            <td>{h.occurred_at}</td>
-                            <td>
-                              <span className={`status ${h.status}`}>
-                                {statusLabels[h.status]}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="muted">
-                    Истории пока нет. Начать можно с любой подходящей
-                    активности.
-                  </p>
-                )}
-              </section>
-            </>
-          )}
-
-          {screen === "hr" && metrics && (
-            <>
-              <div className="page-heading">
-                <div>
-                  <div className="eyebrow">РАЗВИТИЕ КОМАНДЫ</div>
-                  <h1>Потребности в развитии</h1>
-                  <p className="muted">
-                    Компетенции, доступные шаги и участие в активностях.
-                  </p>
-                </div>
-                <span className="pill">
-                  {metrics.employee_count} сотрудников
-                </span>
-              </div>
-              <div className="hr-grid">
-                <section className="panel">
-                  <h2>Где есть разрыв</h2>
-                  <p className="caption">
-                    Среди сотрудников с известным уровнем, которым навык
-                    требуется для следующего грейда.
-                  </p>
-                  {metrics.gaps.map((g) => (
-                    <div className="hr-gap" key={g.name}>
-                      <div>
-                        <strong>{g.name}</strong>
-                        <span>
-                          {g.affected} из {g.eligible}
-                        </span>
-                      </div>
-                      <div className="skill-track">
-                        <span style={{ width: `${g.percent || 0}%` }} />
-                      </div>
-                      {g.unknown > 0 && (
-                        <small>Неизвестный уровень: {g.unknown}</small>
-                      )}
-                    </div>
-                  ))}
-                </section>
-                <section className="panel">
-                  <h2>Без доступного шага</h2>
-                  <p className="caption">
-                    Проверяется наличие подходящих активностей, независимо от
-                    генерации AI-рекомендации.
-                  </p>
-                  {metrics.no_step.length ? (
-                    metrics.no_step.map((p) => (
-                      <button
-                        className="no-step"
-                        disabled={!!busy}
-                        key={p.id}
-                        onClick={() =>
-                          void run("Открываем профиль", async () => {
-                            await loadProfile(p.id);
-                            setScreen("profile");
-                          })
-                        }
-                      >
-                        <strong>{p.name} ↗</strong>
-                        <span>{reasonLabels[p.reason] || p.reason}</span>
-                      </button>
-                    ))
-                  ) : (
-                    <p className="empty">
-                      Для каждого сотрудника есть подходящий шаг.
-                    </p>
-                  )}
-                </section>
-              </div>
-              <section className="panel history">
-                <h2>Участие по активностям</h2>
-                <div className="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Активность</th>
-                        <th>Завершено</th>
-                        <th>Пропущено</th>
-                        <th>Отказы</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {metrics.participation.map((p) => (
-                        <tr key={p.id}>
-                          <td>{p.title}</td>
-                          <td>{p.completed}</td>
-                          <td>{p.missed}</td>
-                          <td>{p.declined}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-              <section className="panel import-panel">
-                <div>
-                  <div className="eyebrow">ДАННЫЕ ДЛЯ ПРОВЕРКИ</div>
-                  <h2>Загрузить дополнительные профили</h2>
-                  <p className="muted">
-                    Сейчас поддерживается внутренний формат demo-v1 из
-                    examples/additional-profile.json. Адаптер JSON/CSV
-                    стартового кита ещё нужно реализовать.
-                  </p>
-                </div>
-                <label className={`primary upload ${busy ? "disabled" : ""}`}>
-                  Выбрать JSON
-                  <input
-                    aria-label="Загрузить JSON-профили"
-                    type="file"
-                    accept=".json,application/json"
-                    disabled={!!busy}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      e.target.value = "";
-                      if (file)
-                        void run("Проверяем и импортируем данные", () =>
-                          importFile(file),
-                        );
-                    }}
-                  />
-                </label>
-              </section>
-            </>
-          )}
-        </main>
-      )}
-      <footer>
-        <span>Career Quest</span>
-        <span>Добровольное развитие. Понятный следующий шаг.</span>
-        <span>Синтетические демо-данные</span>
-      </footer>
-    </div>
-  );
+                catch {
+                    setDemo([]);
+                }
+            }
+            setError((e as Error).message);
+            return false;
+        }
+        finally {
+            busyRef.current = false;
+            setBusy('');
+        }
+    }
+    function navigate(s: Section) { setSection(s); setError(''); headingRef.current?.focus(); window.scrollTo({ top: 0, behavior: 'instant' }); }
+    function openProfile(id: string) { void run('profile', async () => { await loadProfile(id); setCelebration(null); navigate('profile'); }); }
+    async function complete(event: Candidate) {
+        if (!profile)
+            return;
+        const oldProfile = profile;
+        await run('complete', async () => {
+            const result = await api<{
+                profile: Profile;
+                already_completed: boolean;
+            }>(`/employees/${encodeURIComponent(oldProfile.employee.id)}/events/${encodeURIComponent(event.id)}/complete`, { method: 'POST' });
+            assignProfile(result.profile);
+            const gains = Object.entries(event.changes).flatMap(([id, c]) => { const before = oldProfile.employee.skills[id]; const after = result.profile.employee.skills[id]; return before !== undefined && after !== undefined && after > before ? [`${c.name}: ${before} → ${after}`] : []; });
+            setCelebration({ title: event.title, before: percent(oldProfile.trajectory.coverage), after: percent(result.profile.trajectory.coverage), gains, already: result.already_completed });
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        });
+    }
+    const who = account?.role === 'hr' ? 'HR-специалист' : profile?.employee.name ?? 'Сотрудник';
+    const activeLabel = section === 'hr' ? 'Обзор команды' : nav.find(n => n.id === section)?.label;
+    const alerts = <>{!online && <div className="message warning" role="status"><Icon name="shield"/>Нет сети. Загруженные данные остаются на экране; для сохранения нужен сервер.</div>}{error && <div className="message error" role="alert"><Icon name="shield"/><span>{error}</span><button className="text-button" disabled={!!busy || booting} onClick={() => account ? void run('refresh', () => account.role === 'hr' && section === 'hr' ? refreshHr() : profile ? loadProfile(profile.employee.id) : loadWorkspace(account)) : void boot()}>Обновить данные</button><button className="icon-button" aria-label="Закрыть ошибку" onClick={() => setError('')}><Icon name="close"/></button></div>}</>;
+    if (booting)
+        return <div className="boot-screen"><Brand /><div className="skeleton"/><p role="status">Открываем ваше пространство роста…</p></div>;
+    if (!account)
+        return <div className="welcome-shell"><header className="welcome-header"><Brand /><span className="demo-tag"><span /> HACKALEM · DEMO</span></header>{alerts}<main className="welcome"><section className="welcome-copy"><span className="eyebrow">РАЗВИТИЕ, В КОТОРОМ ЕСТЬ СМЫСЛ</span><h1>Ваш рост.<br />Ваш маршрут.<br /><em>Ваш следующий шаг.</em></h1><p>Превратите разрозненное обучение в понятный путь к следующему уровню. Один полезный квест за раз.</p><div className="welcome-steps"><span><b>01</b>Увидеть цель</span><Icon name="arrow"/><span><b>02</b>Выбрать квест</span><Icon name="arrow"/><span><b>03</b>Заметить рост</span></div><div className="welcome-note"><Icon name="leaf"/>Без гонки с коллегами. В своём ритме.</div></section><section className="login-card"><span className="large-icon"><Icon name="compass"/></span><h2>Начнём ваше путешествие</h2><p className="muted">Выберите профиль для знакомства с Career Quest.</p><div className="role-toggle" aria-label="Роль для демонстрации"><button aria-pressed={loginRole === 'employee'} onClick={() => setLoginRole('employee')}>Я сотрудник</button><button aria-pressed={loginRole === 'hr'} onClick={() => setLoginRole('hr')}>Я HR</button></div><div className="account-list">{demo.filter(d => d.role === loginRole).map(item => <button className="account-option" disabled={!!busy} key={item.id} onClick={() => void run('login', async () => { const who = await api<Account>('/auth/demo', { method: 'POST', body: JSON.stringify({ account: item.id }) }); setAccount(who); await loadWorkspace(who); })}><span className="avatar">{item.role === 'hr' ? 'HR' : initials(item.label)}</span><span><strong>{item.label}</strong><small>{item.role === 'hr' ? 'Помогать развитию команды' : 'Открыть личную траекторию'}</small></span><Icon name="arrow"/></button>)}</div>{!demo.filter(d => d.role === loginRole).length && <p className="empty-text">{error ? 'Профили пока не загрузились. Попробуйте обновить данные.' : 'Демонстрационные профили недоступны. Обратитесь к администратору за доступом.'}</p>}<div className="login-foot"><Icon name="shield"/><span>Демо на синтетических данных.<br />Реальные персональные данные не используются.</span></div></section></main><footer className="welcome-footer">CAREER QUEST <span>Ваше развитие начинается с понятного «зачем».</span></footer>{busy && <div className="working" role="status">{busyLabels[busy]}…</div>}</div>;
+    return <div className="app-shell"><a href="#workspace" className="skip-link">К основному содержимому</a><aside className="sidebar"><a href="#workspace" className="brand-link" onClick={() => navigate(account.role === 'hr' ? 'hr' : 'profile')} aria-label="Career Quest, главная"><Brand /></a><div className="workspace-label">{account.role === 'hr' ? 'РАЗВИТИЕ КОМАНДЫ' : 'МОЁ РАЗВИТИЕ'}</div><nav aria-label="Разделы Career Quest">{account.role === 'hr' && <button aria-label="Обзор команды" disabled={!!busy} className={section === 'hr' ? 'active' : ''} aria-current={section === 'hr' ? 'page' : undefined} onClick={() => void run('refresh', async () => { await refreshHr(); navigate('hr'); })}><Icon name="users"/><span>Обзор команды</span></button>}{nav.map(n => <button aria-label={account.role === 'hr' && n.id === 'profile' ? 'Профиль сотрудника' : n.label} title={n.label} disabled={!!busy || (account.role === 'hr' && !profile)} key={n.id} className={section === n.id ? 'active' : ''} aria-current={section === n.id ? 'page' : undefined} onClick={() => navigate(n.id)}><Icon name={n.icon}/><span>{account.role === 'hr' && n.id === 'profile' ? 'Профиль сотрудника' : n.label}</span>{n.id === 'quests' && !!profile?.available.length && <small>{profile.available.length}</small>}</button>)}</nav><div className="sidebar-bottom"><div className="sidebar-note"><Icon name="leaf"/><strong>Растите в своём темпе</strong><p>Ваш путь уникален.<br />Каждый шаг имеет значение.</p></div><span className="demo-tag"><span />Синтетические демо-данные</span><button className="logout" aria-label="Выйти из профиля" disabled={!!busy} onClick={() => void run('logout', async () => { await api('/auth/logout', { method: 'POST' }); clearSession(); const result = await api<{
+        accounts: DemoAccount[];
+    }>('/auth/demo-accounts'); setDemo(result.accounts); })}><Icon name="logout"/>Выйти из профиля</button></div></aside><div className="main-shell"><header className="topbar"><div className="breadcrumb">Пространство роста<Icon name="chevron"/><strong>{activeLabel}</strong></div><div className="topbar-user"><span className="private-label"><Icon name="shield"/>{account.role === 'hr' ? 'Доступ HR' : 'Личный прогресс'}</span><span className="avatar small-avatar">{initials(who)}</span><span className="user-name">{who}<small>{account.role === 'hr' ? 'Развитие команды' : profile?.employee.grade}</small></span></div></header><main id="workspace" className="workspace" ref={headingRef} tabIndex={-1}>{alerts}{account.role === 'hr' && section !== 'hr' && <div className="hr-profile-toolbar"><button className="text-button" disabled={!!busy} onClick={() => void run('refresh', async () => { await refreshHr(); navigate('hr'); })}>← Назад к HR-обзору</button><label>Сотрудник<select value={profile?.employee.id ?? ''} disabled={!!busy} onChange={e => openProfile(e.target.value)}>{people.map(p => <option key={p.id} value={p.id}>{p.name} · {p.id}</option>)}</select></label></div>}{section === 'hr' && metrics ? <HrView metrics={metrics} people={people} busy={busy} openProfile={openProfile} refresh={refreshHr} run={run}/> : section !== 'hr' && profile ? <ProfileView profile={profile} recommendation={recommendation} section={section} employee={account.role === 'employee'} busy={busy} onRecommend={() => void run('recommend', async () => setRecommendation(await api<Recommendations>(`/employees/${encodeURIComponent(profile.employee.id)}/recommendations`, { method: 'POST' })))} onComplete={c => void complete(c)} onNavigate={navigate} celebration={celebration} clearCelebration={() => setCelebration(null)}/> : <div className="panel empty-quest"><Icon name="compass"/><h1>Пространство ещё не загрузилось</h1><p>Обновите данные, чтобы продолжить.</p><button className="primary" disabled={!!busy} onClick={() => void run('refresh', () => loadWorkspace(account))}>Попробовать снова</button></div>}<footer className="workspace-footer"><span>CAREER QUEST <span className="dot">/</span> МАЛЕНЬКИЕ ШАГИ. БОЛЬШИЕ ВОЗМОЖНОСТИ.</span><span>Создано для вашего роста <Icon name="leaf"/></span></footer></main></div>{busy && busy !== 'recommend' && <div className="working" role="status"><span className="spinner"/>{busyLabels[busy] ?? 'Загрузка'}…</div>}</div>;
 }
-
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById('root')!).render(<App />);
