@@ -1,10 +1,20 @@
 from datetime import date
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Identifier = Annotated[str, Field(min_length=1, max_length=80, pattern=r'^[A-Za-z0-9_-]+$')]
 Level = Annotated[int, Field(strict=True, ge=0, le=5)]
+
+
+def nonblank(value: str) -> str:
+    if not value.strip():
+        raise ValueError('Must contain a non-whitespace character')
+    return value
+
+
+Role = Annotated[str, Field(min_length=1, max_length=100), AfterValidator(nonblank)]
+Grade = Annotated[str, Field(min_length=1, max_length=50), AfterValidator(nonblank)]
 
 
 class StrictModel(BaseModel):
@@ -14,9 +24,9 @@ class StrictModel(BaseModel):
 class EmployeeInput(StrictModel):
     id: Identifier
     name: str = Field(min_length=1, max_length=100)
-    role: str = Field(min_length=1, max_length=100)
-    grade: str = Field(min_length=1, max_length=50)
-    tenure_months: int = Field(ge=0, le=1200)
+    role: Role
+    grade: Grade
+    tenure_months: int = Field(strict=True, ge=0, le=1200)
     skills: dict[Identifier, Level]
 
 
@@ -35,15 +45,22 @@ class EventInput(StrictModel):
     id: Identifier
     title: str = Field(min_length=1, max_length=200)
     type: str = Field(min_length=1, max_length=50)
-    roles: list[str] = Field(max_length=50)
-    grades: list[str] = Field(max_length=20)
+    roles: list[Role] = Field(max_length=50)
+    grades: list[Grade] = Field(max_length=20)
     effects: dict[Identifier, Effect]
+
+    @field_validator('roles', 'grades')
+    @classmethod
+    def unique_audience(cls, values):
+        if len(values) != len(set(values)):
+            raise ValueError('Duplicate audience entry')
+        return values
 
 
 class GradeRule(StrictModel):
-    role: str = Field(min_length=1, max_length=100)
-    grade: str = Field(min_length=1, max_length=50)
-    next_grade: str = Field(min_length=1, max_length=50)
+    role: Role
+    grade: Grade
+    next_grade: Grade
     requirements: dict[Identifier, Level]
 
 
@@ -53,6 +70,22 @@ class HistoryInput(StrictModel):
     event_id: Identifier
     status: Literal['completed', 'missed', 'declined']
     occurred_at: date
+
+    @field_validator('occurred_at', mode='before')
+    @classmethod
+    def canonical_date(cls, value):
+        # No timestamps or numeric epoch coercion in the documented demo format.
+        if type(value) is date:
+            return value
+        if isinstance(value, str):
+            try:
+                parsed = date.fromisoformat(value)
+            except ValueError:
+                pass
+            else:
+                if parsed.isoformat() == value:
+                    return parsed
+        raise ValueError('Expected a valid calendar date in YYYY-MM-DD format')
 
 
 class DatasetBundle(StrictModel):
@@ -64,14 +97,9 @@ class DatasetBundle(StrictModel):
     history: list[HistoryInput] = Field(default_factory=list, max_length=100000)
 
     @model_validator(mode='after')
-    def unique_ids(self):
-        for name in ('employees', 'skills', 'events', 'history'):
-            ids = [item.id for item in getattr(self, name)]
-            if len(ids) != len(set(ids)):
-                raise ValueError(f'Duplicate IDs in {name}')
-        keys = [(x.role, x.grade) for x in self.grade_rules]
-        if len(keys) != len(set(keys)):
-            raise ValueError('Duplicate role/grade rule')
+    def nonempty_bundle(self):
+        # Exact repeats are idempotent; conflicting repeats are reported by the
+        # importer with the precise source path, before any rows are written.
         if not any((self.employees, self.skills, self.events, self.grade_rules, self.history)):
             raise ValueError('Empty bundle')
         return self

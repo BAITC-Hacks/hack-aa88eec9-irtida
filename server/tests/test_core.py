@@ -154,6 +154,7 @@ def test_no_grade_rule_and_hr_counts(client):
 
 def test_provider_failure_is_honest_fallback(client, settings, monkeypatch):
     settings.provider = 'openai'
+    settings.cloud_data_approved = True
     async def fail(*args):
         raise TimeoutError('sensitive provider information')
     monkeypatch.setattr(providers, 'select_events', fail)
@@ -167,6 +168,7 @@ def test_provider_failure_is_honest_fallback(client, settings, monkeypatch):
 
 def test_daily_ai_cap(client, settings):
     settings.provider, settings.per_day = 'openai', 0
+    settings.cloud_data_approved = True
     login(client)
     assert recommendation(client).status_code == 429
 

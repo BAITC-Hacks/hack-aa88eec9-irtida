@@ -55,6 +55,15 @@ class AIRequest(Base):
     provider: Mapped[str] = mapped_column(String)
 
 
+class ImportRecord(Base):
+    """Original kit records retained locally for conflict detection and replay."""
+
+    __tablename__ = 'import_records'
+    source: Mapped[str] = mapped_column(String, primary_key=True)
+    record_id: Mapped[str] = mapped_column(String, primary_key=True)
+    payload: Mapped[dict] = mapped_column(JSON)
+
+
 def connect(url: str):
     filename = url.removeprefix('sqlite:///')
     if filename != ':memory:':
@@ -67,6 +76,12 @@ def connect(url: str):
         cursor.execute('PRAGMA foreign_keys=ON')
         cursor.execute('PRAGMA journal_mode=WAL')
         cursor.close()
+
+    @event.listens_for(engine, 'checkout')
+    def reset_busy_timeout(connection, _record, _proxy):
+        # Recommendation writes use a shorter local wait; do not leak it to
+        # completion/import transactions via pooled SQLite connections.
+        connection.execute('PRAGMA busy_timeout=5000')
 
     Base.metadata.create_all(engine)
     return engine, sessionmaker(engine, expire_on_commit=False)
